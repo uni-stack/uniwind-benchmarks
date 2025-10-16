@@ -10,7 +10,9 @@
   "dependencies": {
     "@uniwind-benchmarks/benchmark": "workspace:*",
     "react": "19.1.1",
-    "react-native": "0.82.0"
+    "react-native": "0.82.0",
+    "tailwindcss": "4.1.14",
+    "uniwind": "1.0.0-beta.8"
   },
   "devDependencies": {
     "@babel/core": "7.28.4",

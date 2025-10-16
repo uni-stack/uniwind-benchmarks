@@ -1,0 +1,18 @@
+@import "tailwindcss";
+@import "uniwind";
+
+@layer theme {
+  :root {
+    @variant dark {
+      --color-primary: #00a8ff;
+      --color-gray: #f0f0f0;
+      --color-typography: #000;
+    }
+
+    @variant light {
+      --color-primary: #273c75;
+      --color-gray: #353b48;
+      --color-typography: #fff;
+    }
+  }
+}

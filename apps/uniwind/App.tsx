@@ -1,28 +1,39 @@
+import './global.css'
 import { useBenchmark } from '@uniwind-benchmarks/benchmark'
-import { ScrollView, StyleSheet, Text, View } from 'react-native'
+import { ScrollView, Text, View } from 'react-native'
 
 function App() {
   const { isComplete, currentRun, totalRuns, average, min, max, itemsCount, renderKey } =
     useBenchmark()
 
   return (
-    <View style={styles.container}>
-      <Text style={styles.header}>Uniwind Benchmark</Text>
+    <View className="flex-1 mt-25 px-3">
+      <Text className="text-lg text-typography font-bold text-center mb-4">Uniwind Benchmark</Text>
 
       {!isComplete ? (
-        <View style={styles.statsContainer}>
-          <Text style={styles.statsText}>Running benchmark...</Text>
-          <Text style={styles.statsText}>
+        <View className="p-4 bg-gray rounded-lg mb-4">
+          <Text className="text-base text-typography font-semibold text-center mb-1">
+            Running benchmark...
+          </Text>
+          <Text className="text-base text-typography font-semibold text-center mb-1">
             Run {currentRun + 1} of {totalRuns}
           </Text>
         </View>
       ) : (
-        <View style={styles.statsContainer}>
-          <Text style={styles.statsText}>✓ Benchmark Complete</Text>
-          <Text style={styles.statsText}>Average: {average.toFixed(2)}ms</Text>
-          <Text style={styles.statsText}>Min: {min.toFixed(2)}ms</Text>
-          <Text style={styles.statsText}>Max: {max.toFixed(2)}ms</Text>
-          <Text style={styles.statsSubtext}>
+        <View className="p-4 bg-primary rounded-lg mb-4">
+          <Text className="text-base text-typography font-semibold text-center mb-1">
+            ✓ Benchmark Complete
+          </Text>
+          <Text className="text-base text-typography font-semibold text-center mb-1">
+            Average: {average.toFixed(2)}ms
+          </Text>
+          <Text className="text-base text-typography font-semibold text-center mb-1">
+            Min: {min.toFixed(2)}ms
+          </Text>
+          <Text className="text-base text-typography font-semibold text-center mb-1">
+            Max: {max.toFixed(2)}ms
+          </Text>
+          <Text className="text-[14px] text-typography text-center mt-2">
             {itemsCount} views × {totalRuns} runs
           </Text>
         </View>
@@ -30,67 +41,20 @@ function App() {
 
       <ScrollView
         key={renderKey}
-        contentContainerStyle={styles.scrollView}
+        contentContainerClassName="gap-2 flex-row flex-wrap"
         showsVerticalScrollIndicator={false}
       >
         {Array.from({ length: itemsCount }, (_, index) => (
-          <View key={index} style={styles.item}>
-            <Text style={styles.text}>{index}</Text>
+          <View
+            key={index}
+            className="w-[32%] h-25 rounded-2xl bg-primary items-center justify-center"
+          >
+            <Text className="text-typography font-bold text-2xl">{index}</Text>
           </View>
         ))}
       </ScrollView>
     </View>
   )
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    marginTop: 100,
-    paddingHorizontal: 12,
-  },
-  scrollView: {
-    gap: 8,
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-  },
-  item: {
-    width: '32%',
-    height: 100,
-    borderRadius: 16,
-    backgroundColor: '#273c75',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  header: {
-    fontSize: 18,
-    fontWeight: 'bold',
-    textAlign: 'center',
-    marginBottom: 16,
-  },
-  statsContainer: {
-    padding: 16,
-    backgroundColor: '#f0f0f0',
-    borderRadius: 8,
-    marginBottom: 16,
-  },
-  statsText: {
-    fontSize: 16,
-    fontWeight: '600',
-    textAlign: 'center',
-    marginBottom: 4,
-  },
-  statsSubtext: {
-    fontSize: 14,
-    color: '#666',
-    textAlign: 'center',
-    marginTop: 8,
-  },
-  text: {
-    color: '#fff',
-    fontSize: 16,
-    fontWeight: 'bold',
-  },
-})
 
 export default App
