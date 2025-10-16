@@ -8,7 +8,9 @@ function App() {
 
   return (
     <View className="flex-1 mt-25 px-3">
-      <Text className="text-lg text-typography font-bold text-center mb-4">Uniwind Benchmark</Text>
+      <Text className="text-lg text-typography font-bold text-center mb-4">
+        Uniwind Pro Benchmark
+      </Text>
 
       {!isComplete ? (
         <View className="p-4 bg-gray rounded-lg mb-4">
