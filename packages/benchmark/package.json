@@ -9,7 +9,13 @@
   },
   "keywords": ["benchmark", "utilities"],
   "license": "ISC",
+  "peerDependencies": {
+    "react": ">=19.0.0"
+  },
   "devDependencies": {
+    "@types/node": "24.7.2",
+    "@types/react": "19.1.1",
+    "react": "19.1.1",
     "typescript": "5.7.2"
   }
 }

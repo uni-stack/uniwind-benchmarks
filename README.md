@@ -49,6 +49,9 @@ bun run format
 
 # Type check
 bun run typecheck
+
+# Run pre-commit checks (lint + typecheck)
+bun run precommit
 ```
 
 ### Working with Apps
