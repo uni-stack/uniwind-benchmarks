@@ -92,7 +92,7 @@
         "react": "19.1.1",
         "react-native": "0.82.0",
         "tailwindcss": "4.1.14",
-        "uniwind": "1.0.0-beta.8",
+        "uniwind": "1.0.0-rc.5",
       },
       "devDependencies": {
         "@babel/core": "7.28.4",
@@ -1533,7 +1533,7 @@
 
     "uniwind/typescript": ["typescript@5.8.3", "", { "bin": { "tsc": "bin/tsc", "tsserver": "bin/tsserver" } }, "sha512-p1diW6TqL9L07nNxvRMM7hMMw4c5XOo/1ibL4aAIGmSAt9slTE1Xgw5KWuof2uTOvCg9BY7ZRi+GaF+7sfgPeQ=="],
 
-    "uniwind/uniwind": ["uniwind@1.0.0-beta.8", "", { "dependencies": { "@tailwindcss/node": "4.1.14", "@tailwindcss/oxide": "4.1.14", "chokidar": "4.0.3", "culori": "4.0.2" }, "peerDependencies": { "chalk": ">=2", "lightningcss": ">=1.30.0", "postcss": ">=8", "react": ">=19.0.0", "react-native": ">=0.81.0", "tailwindcss": ">=4" } }, "sha512-WkJUsN9ywPq9M7ui42MjxlO0a8DsyXmnyQu7utAoP5qByyRteQ+DD5q8JwgQ/x10/d6tjHsNL0a/YyM0+CXZiA=="],
+    "uniwind/uniwind": ["uniwind@1.0.0-rc.5", "", { "dependencies": { "@tailwindcss/node": "4.1.14", "@tailwindcss/oxide": "4.1.14", "chokidar": "4.0.3", "culori": "4.0.2" }, "peerDependencies": { "chalk": ">=2", "lightningcss": ">=1.30.0", "postcss": ">=8", "react": ">=19.0.0", "react-native": ">=0.81.0", "tailwindcss": ">=4" } }, "sha512-opyFV8pSg+0y74EM2hsdnST6rKMs9Mn8+pF7pSv9LVG6B0fTar18B+z/LWuCGwsjmcRtBtxvzphUeWysWScX9Q=="],
 
     "uniwind-pro/tailwindcss": ["tailwindcss@4.1.14", "", {}, "sha512-b7pCxjGO98LnxVkKjaZSDeNuljC4ueKUddjENJOADtubtdo8llTaJy7HwBMeLNSSo2N5QIAgklslK1+Ir8r6CA=="],
 
