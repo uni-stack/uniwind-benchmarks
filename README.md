@@ -2,7 +2,7 @@
 
 Benchmark repository for different React Native styling libraries.
 
-<img src="./assets//result.jpg" width="500" alt="Result">
+<img src="./assets//result.jpg"  alt="Result">
 
 iPhone 17 Pro Max running iOS 26.0 in Release mode.
 Result after opening the app for the second time (cached by the OS).
@@ -16,7 +16,7 @@ It’s difficult to directly compare Unistyles, Uniwind, and Nativewind to Style
 | --- | --- | 
 | StyleSheet | 49.74 | 
 | Unistyles | 66.40 | 
-| Uniwind | 81.47 | 
+| Uniwind | 81.36 | 
 | NativeWind | 197.22 | 
 
 <img src="./assets/stylesheet.png" width="300" alt="Stylesheet">
