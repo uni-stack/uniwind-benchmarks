@@ -9,7 +9,7 @@ Result after opening the app for the second time (cached by the OS).
 
 Uniwind and NativeWind use the exact same classNames.
 
-It’s difficult to directly compare Unistyles, Uniwind, and Nativewind to StyleSheet, as the it has no features, it only serves as a baseline for performance.
+It’s difficult to directly compare Unistyles, Uniwind, and Nativewind to StyleSheet, as it has no features, it only serves as a baseline for performance.
 
 
 | Library | Time | 
