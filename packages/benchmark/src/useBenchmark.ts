@@ -34,6 +34,7 @@ export function useBenchmark(): UseBenchmarkReturn {
   const [renderKey, setRenderKey] = useState(0)
 
   const runBenchmark = useCallback(() => {
+    // @ts-ignore
     const startTime = performance.now()
 
     // Force a re-render to measure
@@ -42,6 +43,7 @@ export function useBenchmark(): UseBenchmarkReturn {
     // Measure after layout
     // @ts-ignore
     requestIdleCallback(() => {
+      // @ts-ignore
       const endTime = performance.now()
       const duration = endTime - startTime
 
