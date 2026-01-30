@@ -8,11 +8,11 @@
     "start": "react-native start"
   },
   "dependencies": {
-    "uniwind-pro": "./uniwind-pro-1.0.0-beta.0.tgz",
+    "uniwind": "npm:uniwind-pro@beta",
     "@uniwind-benchmarks/benchmark": "workspace:*",
     "react": "19.1.1",
     "react-native": "0.82.0",
-    "react-native-nitro-modules": "0.31.9",
+    "react-native-nitro-modules": "0.32.1",
     "react-native-reanimated": "4.1.5",
     "react-native-worklets": "0.6.1",
     "tailwindcss": "4.1.14"
