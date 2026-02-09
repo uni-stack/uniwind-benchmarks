@@ -99,8 +99,7 @@
         "@uniwind-benchmarks/benchmark": "workspace:*",
         "react": "19.1.1",
         "react-native": "0.82.0",
-        "tailwindcss": "4.1.14",
-        "uniwind": "1.0.4",
+        "uniwind": "1.3.0",
       },
       "devDependencies": {
         "@babel/core": "7.28.4",
@@ -130,7 +129,7 @@
         "react-native-reanimated": "4.1.5",
         "react-native-worklets": "0.6.1",
         "tailwindcss": "4.1.14",
-        "uniwind": "npm:uniwind-pro@beta",
+        "uniwind": "npm:uniwind-pro@1.0.0-beta.9-30012026",
       },
       "devDependencies": {
         "@babel/core": "7.28.4",
@@ -1647,11 +1646,9 @@
 
     "unistyles3/typescript": ["typescript@5.8.3", "", { "bin": { "tsc": "bin/tsc", "tsserver": "bin/tsserver" } }, "sha512-p1diW6TqL9L07nNxvRMM7hMMw4c5XOo/1ibL4aAIGmSAt9slTE1Xgw5KWuof2uTOvCg9BY7ZRi+GaF+7sfgPeQ=="],
 
-    "uniwind/tailwindcss": ["tailwindcss@4.1.14", "", {}, "sha512-b7pCxjGO98LnxVkKjaZSDeNuljC4ueKUddjENJOADtubtdo8llTaJy7HwBMeLNSSo2N5QIAgklslK1+Ir8r6CA=="],
-
     "uniwind/typescript": ["typescript@5.8.3", "", { "bin": { "tsc": "bin/tsc", "tsserver": "bin/tsserver" } }, "sha512-p1diW6TqL9L07nNxvRMM7hMMw4c5XOo/1ibL4aAIGmSAt9slTE1Xgw5KWuof2uTOvCg9BY7ZRi+GaF+7sfgPeQ=="],
 
-    "uniwind/uniwind": ["uniwind@1.0.4", "", { "dependencies": { "@tailwindcss/node": "4.1.17", "@tailwindcss/oxide": "4.1.17", "culori": "4.0.2", "lightningcss": "1.30.2" }, "peerDependencies": { "react": ">=19.0.0", "react-native": ">=0.81.0", "tailwindcss": ">=4" } }, "sha512-Vfyt1LaZbafx7URgG1ZXYrKfUIP31ijcnuKncur7mYY/CTT7gt3BFGBn5jhCaLSZJgVL91t9prJ4XgikmXtUBA=="],
+    "uniwind/uniwind": ["uniwind@1.3.0", "", { "dependencies": { "@tailwindcss/node": "4.1.17", "@tailwindcss/oxide": "4.1.17", "culori": "4.0.2", "lightningcss": "1.30.2" }, "peerDependencies": { "react": ">=19.0.0", "react-native": ">=0.81.0", "tailwindcss": ">=4" } }, "sha512-Ce4WKX0F3FBhmltiT5gG5ULJzDxnAjOt92+YxCAenuu1hcG3VAJnM8/YX/w69iXuldFTinGBIEIkdoe1Ysum7w=="],
 
     "uniwind-pro/react-native-nitro-modules": ["react-native-nitro-modules@0.32.1", "", { "peerDependencies": { "react": "*", "react-native": "*" } }, "sha512-V+Vy76e4fxRxgVGu5Uh3cBPvuFQW8fM1OUKk1mqEA/JawjhX+hxHtBhpfuvNjV0BnV/uXCIg8/eK+rTpB6tqFg=="],
 
@@ -1659,7 +1656,7 @@
 
     "uniwind-pro/typescript": ["typescript@5.8.3", "", { "bin": { "tsc": "bin/tsc", "tsserver": "bin/tsserver" } }, "sha512-p1diW6TqL9L07nNxvRMM7hMMw4c5XOo/1ibL4aAIGmSAt9slTE1Xgw5KWuof2uTOvCg9BY7ZRi+GaF+7sfgPeQ=="],
 
-    "uniwind-pro/uniwind": ["uniwind-pro@1.0.0-beta.9", "", { "dependencies": { "@tailwindcss/node": "4.1.18", "@tailwindcss/oxide": "4.1.18", "@zowe/secrets-for-zowe-sdk": "8.29.4", "chalk": "5.6.2", "chokidar": "5.0.0", "culori": "4.0.2", "eventsource": "4.1.0", "figlet": "1.9.4", "inquirer": "13.2.0", "jwt-decode": "4.0.0", "lightningcss": "1.30.2", "open": "11.0.0", "tar": "7.5.2" }, "bin": { "uniwind-pro": "pre/cli/index.js" } }, "sha512-bR9+ToDmavV5RL6viA02nvUSIQFUwguWv0BQacGucLU9m1oYugivy+V1c4iOt1OEyjr/C/nnoDgc50oBuLPssw=="],
+    "uniwind-pro/uniwind": ["uniwind-pro@1.0.0-beta.9-30012026", "", { "dependencies": { "@tailwindcss/node": "4.1.18", "@tailwindcss/oxide": "4.1.18", "@zowe/secrets-for-zowe-sdk": "8.29.4", "chalk": "5.6.2", "chokidar": "5.0.0", "culori": "4.0.2", "eventsource": "4.1.0", "figlet": "1.9.4", "inquirer": "13.2.0", "jwt-decode": "4.0.0", "lightningcss": "1.30.2", "open": "11.0.0", "tar": "7.5.2" }, "bin": { "uniwind-pro": "pre/cli/index.js" } }, "sha512-+E/zqHrfIXejDpslBNcjU8maVVzU7rgx7nrCRwvF8BtjVrUbIqylBSZVA9CVKFxVoCtV+7mdOt0Y0KXwRa/AvA=="],
 
     "wsl-utils/is-wsl": ["is-wsl@3.1.0", "", { "dependencies": { "is-inside-container": "^1.0.0" } }, "sha512-UcVfVfaK4Sc4m7X3dUSoHoozQGBEFeDC+zVo06t98xe8CzHSZZBekNXH+tu0NalHolcJ/QAGqS46Hef7QXBIMw=="],
 
@@ -1746,6 +1743,8 @@
     "uniwind-pro/uniwind/lightningcss": ["lightningcss@1.30.2", "", { "dependencies": { "detect-libc": "^2.0.3" }, "optionalDependencies": { "lightningcss-android-arm64": "1.30.2", "lightningcss-darwin-arm64": "1.30.2", "lightningcss-darwin-x64": "1.30.2", "lightningcss-freebsd-x64": "1.30.2", "lightningcss-linux-arm-gnueabihf": "1.30.2", "lightningcss-linux-arm64-gnu": "1.30.2", "lightningcss-linux-arm64-musl": "1.30.2", "lightningcss-linux-x64-gnu": "1.30.2", "lightningcss-linux-x64-musl": "1.30.2", "lightningcss-win32-arm64-msvc": "1.30.2", "lightningcss-win32-x64-msvc": "1.30.2" } }, "sha512-utfs7Pr5uJyyvDETitgsaqSyjCb2qNRAtuqUeWIAKztsOYdcACf2KtARYXg2pSvhkt+9NfoaNY7fxjl6nuMjIQ=="],
 
     "uniwind/uniwind/lightningcss": ["lightningcss@1.30.2", "", { "dependencies": { "detect-libc": "^2.0.3" }, "optionalDependencies": { "lightningcss-android-arm64": "1.30.2", "lightningcss-darwin-arm64": "1.30.2", "lightningcss-darwin-x64": "1.30.2", "lightningcss-freebsd-x64": "1.30.2", "lightningcss-linux-arm-gnueabihf": "1.30.2", "lightningcss-linux-arm64-gnu": "1.30.2", "lightningcss-linux-arm64-musl": "1.30.2", "lightningcss-linux-x64-gnu": "1.30.2", "lightningcss-linux-x64-musl": "1.30.2", "lightningcss-win32-arm64-msvc": "1.30.2", "lightningcss-win32-x64-msvc": "1.30.2" } }, "sha512-utfs7Pr5uJyyvDETitgsaqSyjCb2qNRAtuqUeWIAKztsOYdcACf2KtARYXg2pSvhkt+9NfoaNY7fxjl6nuMjIQ=="],
+
+    "uniwind/uniwind/tailwindcss": ["tailwindcss@4.1.14", "", {}, "sha512-b7pCxjGO98LnxVkKjaZSDeNuljC4ueKUddjENJOADtubtdo8llTaJy7HwBMeLNSSo2N5QIAgklslK1+Ir8r6CA=="],
 
     "@inquirer/core/wrap-ansi/string-width/emoji-regex": ["emoji-regex@10.6.0", "", {}, "sha512-toUI84YS5YmxW219erniWD0CIVOo46xGKColeNQRgOzDorgBi1v4D71/OFzgD9GO2UGKIv1C3Sp8DAn0+j5w7A=="],
 
