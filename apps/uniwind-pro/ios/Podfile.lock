@@ -2560,7 +2560,7 @@ PODS:
     - SocketRocket
     - Yoga
   - SocketRocket (0.7.1)
-  - Uniwind (1.0.0-beta.9):
+  - Uniwind (1.0.0-rc.2):
     - boost
     - DoubleConversion
     - fast_float
@@ -2915,7 +2915,7 @@ SPEC CHECKSUMS:
   RNReanimated: 2c67ead90e9819859bf1be0035b4aea0b8f5e698
   RNWorklets: 10441e257748f97e6bca895c5b2bfc114f06a7cf
   SocketRocket: d4aabe649be1e368d1318fdf28a022d714d65748
-  Uniwind: 3d4aaed886871336154d52de7665b024d052103b
+  Uniwind: 2cde3c2987636aac072cbbc0bca85ca029760291
   Yoga: edeb9900b9e5bb5b27b9a6a2d5914e4fe4033c1b
 
 PODFILE CHECKSUM: 74b7d342a48249193f163827fe44a0f95a76cae4
