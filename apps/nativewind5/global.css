@@ -1,0 +1,19 @@
+@import "tailwindcss/theme.css" layer(theme);
+@import "tailwindcss/preflight.css" layer(base);
+@import "tailwindcss/utilities.css";
+
+@import "nativewind/theme";
+
+@theme {
+  --color-primary: #00a8ff;
+  --color-gray: #f0f0f0;
+  --color-typography: #000;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --color-primary: #273c75;
+    --color-gray: #353b48;
+    --color-typography: #fff;
+  }
+}
