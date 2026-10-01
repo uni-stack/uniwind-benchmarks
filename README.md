@@ -2,63 +2,49 @@
 
 Benchmark repository for different React Native styling libraries.
 
-iPhone 17 Pro running iOS 26.0 in Release mode.
-Result after opening the app for the second time (cached by the OS).
+<img src="./assets/result.jpg" alt="iOS results">
 
-Uniwind, NativeWind 4 and NativeWind 5 use the exact same classNames.
+<img src="./assets/result-android.jpg" alt="Android results">
 
-It’s difficult to directly compare Unistyles, Uniwind, and NativeWind to StyleSheet, as it has no features, it only serves as a baseline for performance.
+## Methodology
 
-## Results
+Every app renders the same screen: a header card plus a grid of 1000 items (2003 views in total), re-rendered 10 times.
+The app shows the average render time of those 10 runs, in milliseconds.
 
-<img src="./assets/chart-ios.png" alt="iOS Benchmark Chart">
-<img src="./assets/chart-android.png" alt="Android Benchmark Chart">
+- Release builds, Hermes, New Architecture, React Native 0.86.3 bare apps (Expo SDK 57 for NativeWind 5)
+- iOS: iPhone 18 Pro Max simulator (iOS 27.0). Android: Pixel_9a AVD (Android 16, API 36, arm64, 4 GB RAM)
+- Warm launches only: after installing an app, the first (cold) launch is discarded, then the app is terminated and relaunched 3 times
+- Memory is read from outside the app after the result, so it does not affect the timing
+- Uniwind, Uniwind Pro and NativeWind use the exact same classNames
 
-### iOS
+It’s difficult to directly compare Unistyles, Uniwind, and Nativewind to StyleSheet, as it has no features, it only serves as a baseline for performance.
 
-| Library | Time (ms) | vs Uniwind |
-| --- | --- | --- |
-| StyleSheet | 49.74 | 1.6x faster |
-| Uniwind Pro RC | 57.11 | 1.4x faster |
-| Unistyles | 66.40 | 1.2x faster |
-| **Uniwind** | **81.36** | **baseline** |
-| NativeWind 4 | 197.22 | 2.4x slower |
-| NativeWind 5 | 258.49 | 3.2x slower |
 
-### Android
+### Memory
 
-| Library | Time (ms) | vs Uniwind |
-| --- | --- | --- |
-| StyleSheet | 60.78 | 1.5x faster |
-| Uniwind Pro RC | 71.19 | 1.3x faster |
-| Unistyles | 79.69 | 1.2x faster |
-| **Uniwind** | **94.14** | **baseline** |
-| NativeWind 4 | 226.66 | 2.4x slower |
-| NativeWind 5 | 270.19 | 2.9x slower |
+Memory of the app after the benchmark (2003 views mounted, after a forced GC), in MB (MiB). Peak is the highest iOS
+footprint during the run.
 
-## Screenshots
+<img src="./assets/memory.jpg" alt="iOS memory">
 
-<img src="./assets/stylesheet.png" width="300" alt="Stylesheet">
-<img src="./assets/unistyles3.png" width="300" alt="Unistyles">
-<img src="./assets/uniwind.png" width="300" alt="Uniwind">
-<img src="./assets/uniwind-pro.png" width="300" alt="Uniwind Pro">
-<img src="./assets/nativewind.png" width="300" alt="NativeWind 4">
-<img src="./assets/nativewind5.png" width="300" alt="NativeWind 5">
+<img src="./assets/memory-android.jpg" alt="Android memory">
 
-## Repository Structure
 
+## Running the benchmarks
+
+```sh
+bun install
+# iOS (from an app directory)
+cd apps/stylesheet/ios && pod install && cd .. && bun run ios -- --mode Release
+# Android
+bun run android -- --mode release
+# NativeWind 5 (Expo)
+cd apps/nativewind5 && bunx expo run:ios --configuration Release
+# Switch the Uniwind Pro app to another version (then `./gradlew clean` before an Android build)
+scripts/use-pro.sh 1.0.1
+# Regenerate the charts from results/results.json (requires Google Chrome and ImageMagick)
+node scripts/generate-chart.mjs
+node scripts/generate-memory-chart.mjs   # assets/memory*.jpg; --sample previews the look with made-up values
 ```
-uniwind-benchmarks/
-├── apps/                    # React Native applications
-│   ├── nativewind4/        # NativeWind v4 benchmark app
-│   ├── nativewind5/        # NativeWind v5 benchmark app
-│   ├── stylesheet/         # React Native StyleSheet benchmark app
-│   ├── unistyles3/         # Unistyles v3 benchmark app
-│   ├── uniwind/            # Uniwind benchmark app
-│   └── uniwind-pro/        # Uniwind Pro benchmark app
-├── packages/
-│   └── benchmark/          # Shared benchmark utilities
-├── biome.json              # Biome configuration (linting + formatting)
-├── tsconfig.json           # TypeScript configuration
-└── package.json            # Workspace root configuration
-```
+
+Uniwind Pro requires a license; `bun install` downloads the package through the Uniwind Pro CLI credentials.
