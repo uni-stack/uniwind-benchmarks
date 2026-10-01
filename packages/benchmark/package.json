@@ -10,15 +10,15 @@
   "keywords": ["benchmark", "utilities"],
   "license": "ISC",
   "dependencies": {
-    "@babel/runtime": "7.28.4"
+    "@babel/runtime": "7.29.7"
   },
   "peerDependencies": {
     "react": ">=19.0.0"
   },
   "devDependencies": {
     "@types/node": "24.7.2",
-    "@types/react": "19.1.1",
-    "react": "19.1.1",
-    "typescript": "5.7.2"
+    "@types/react": "19.2.18",
+    "react": "19.2.3",
+    "typescript": "5.9.3"
   }
 }

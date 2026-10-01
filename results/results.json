@@ -1,0 +1,882 @@
+{
+  "date": "2026-10-01",
+  "host": {
+    "chip": "Apple M3 Pro",
+    "os": "macOS 27.0"
+  },
+  "devices": {
+    "ios": {
+      "model": "iPhone 18 Pro Max simulator",
+      "os": "iOS 27.0"
+    },
+    "android": {
+      "model": "Pixel_9a AVD",
+      "os": "Android 16 (API 36)",
+      "abi": "arm64-v8a",
+      "image": "google_apis_playstore",
+      "ram": "4 GB",
+      "cores": 4,
+      "bootFlags": "-no-snapshot-load -no-audio -memory 4096 -no-window -gpu host"
+    }
+  },
+  "method": "Release builds (Hermes, New Architecture), no rebuild during measurement. Host gate: 1-minute load average below 6 before every launch. Per block: StyleSheet warm control, install the app, 1 cold launch discarded, 3 warm launches (terminate + relaunch), StyleSheet warm control. A block is accepted only if both controls are within 20% of the session baseline (median of the first 3 StyleSheet warm launches). The result is read once, 10 s after launch. Two sweeps: A in the order listed in configs, B reversed. warmLaunches lists sweep A then sweep B; median = median of those 6 values. Android emulator runs windowless because a hidden emulator window is throttled by macOS App Nap. Memory (2026-10-01 on): read after the result, after a simulated memory warning (iOS) / trim-memory RUNNING_CRITICAL (Android) that makes React Native run a full Hermes GC; iOS phys_footprint and its peak, Android TOTAL PSS (not published yet). See memoryMetrics.",
+  "sessionBaseline": {
+    "ios": 38.3,
+    "android": 59.84
+  },
+  "configs": [
+    {
+      "id": "stylesheet",
+      "library": "StyleSheet",
+      "package": "react-native",
+      "version": "0.86.3",
+      "label": "StyleSheet",
+      "ios": {
+        "median": 37.28,
+        "ratioToStyleSheet": 1.0,
+        "spread": [
+          36.96,
+          38.41
+        ],
+        "warmLaunches": [
+          37.07,
+          37.5,
+          36.96,
+          38.41,
+          38.11,
+          37.03
+        ],
+        "controls": [
+          39.29,
+          37.5,
+          39.09,
+          37.48
+        ],
+        "measuredOn": "2026-10-01",
+        "note": "Measured on 2026-10-01 on iPhone 18 Pro Max simulator, iOS 27.0 with scripts/bench/measure.py (2 sweeps x 3 warm launches). StyleSheet controls median 38.3 ms, +2.7% vs the StyleSheet median 37.28 ms.",
+        "memory": {
+          "median": 74.75,
+          "peak": 134.4,
+          "spread": [
+            72.0,
+            75.3
+          ],
+          "launches": [
+            74.7,
+            72.5,
+            74.8,
+            72.0,
+            75.1,
+            75.3
+          ],
+          "controls": [
+            74.3,
+            72.5,
+            75.5,
+            73.1
+          ],
+          "controlMedian": 73.7
+        },
+        "build": {
+          "version": "0.86.3",
+          "spec": "0.86.3",
+          "published": true
+        }
+      },
+      "android": {
+        "median": 59.95,
+        "ratioToStyleSheet": 1.0,
+        "spread": [
+          58.6,
+          66.59
+        ],
+        "warmLaunches": [
+          58.6,
+          60.32,
+          59.46,
+          66.59,
+          59.87,
+          60.02
+        ],
+        "controls": [
+          58.72,
+          63.8,
+          59.22,
+          64.33
+        ],
+        "measuredOn": "2026-10-01",
+        "note": "Measured on 2026-10-01 on Pixel_9a AVD, Android 16 (API 36) with scripts/bench/measure.py (2 sweeps x 3 warm launches). StyleSheet controls median 61.51 ms, +2.6% vs the StyleSheet median 59.95 ms.",
+        "memory": {
+          "median": 187.05,
+          "spread": [
+            181.5,
+            200.4
+          ],
+          "launches": [
+            200.4,
+            186.6,
+            181.5,
+            187.7,
+            187.5,
+            186.1
+          ],
+          "controls": [
+            187.9,
+            181.5,
+            179.4,
+            189.1
+          ],
+          "controlMedian": 184.7,
+          "breakdown": {
+            "Java Heap": 12.9,
+            "Native Heap": 128.4,
+            "Code": 20.05,
+            "Stack": 0.5,
+            "Graphics": 0.0,
+            "Private Other": 21.6,
+            "System": 4.15
+          }
+        },
+        "build": {
+          "version": "0.86.3",
+          "spec": "0.86.3",
+          "published": true
+        }
+      }
+    },
+    {
+      "id": "unistyles",
+      "library": "Unistyles",
+      "package": "react-native-unistyles",
+      "version": "3.3.0",
+      "label": "Unistyles 3.3.0",
+      "ios": {
+        "median": 53.81,
+        "ratioToStyleSheet": 1.44,
+        "spread": [
+          52.43,
+          54.93
+        ],
+        "warmLaunches": [
+          54.93,
+          53.7,
+          53.25,
+          52.43,
+          53.92,
+          54.48
+        ],
+        "controls": [
+          39.7,
+          38.3,
+          38.86,
+          38.41
+        ],
+        "measuredOn": "2026-10-01",
+        "note": "Measured on 2026-10-01 on iPhone 18 Pro Max simulator, iOS 27.0 with scripts/bench/measure.py (2 sweeps x 3 warm launches). StyleSheet controls median 38.63 ms, +3.6% vs the StyleSheet median 37.28 ms.",
+        "memory": {
+          "median": 81.1,
+          "peak": 118.1,
+          "spread": [
+            80.6,
+            81.8
+          ],
+          "launches": [
+            81.8,
+            80.7,
+            80.6,
+            81.5,
+            81.0,
+            81.2
+          ],
+          "controls": [
+            73.5,
+            73.0,
+            72.3,
+            72.6
+          ],
+          "controlMedian": 72.8
+        },
+        "build": {
+          "version": "3.3.0",
+          "spec": "3.3.0",
+          "published": true
+        }
+      },
+      "android": {
+        "median": 75.16,
+        "ratioToStyleSheet": 1.25,
+        "spread": [
+          74.4,
+          89.63
+        ],
+        "warmLaunches": [
+          75.34,
+          74.4,
+          74.81,
+          89.63,
+          75.85,
+          74.99
+        ],
+        "controls": [
+          59.68,
+          59.05,
+          60.56,
+          59.12
+        ],
+        "measuredOn": "2026-10-01",
+        "note": "Measured on 2026-10-01 on Pixel_9a AVD, Android 16 (API 36) with scripts/bench/measure.py (2 sweeps x 3 warm launches). StyleSheet controls median 59.4 ms, -0.9% vs the StyleSheet median 59.95 ms.",
+        "memory": {
+          "median": 163.45,
+          "spread": [
+            159.0,
+            167.0
+          ],
+          "launches": [
+            167.0,
+            162.9,
+            164.0,
+            159.0,
+            161.9,
+            165.7
+          ],
+          "controls": [
+            174.4,
+            187.5,
+            179.0,
+            185.2
+          ],
+          "controlMedian": 182.1,
+          "breakdown": {
+            "Java Heap": 13.0,
+            "Native Heap": 98.2,
+            "Code": 25.1,
+            "Stack": 0.5,
+            "Graphics": 0.0,
+            "Private Other": 22.0,
+            "System": 4.25
+          }
+        },
+        "build": {
+          "version": "3.3.0",
+          "spec": "3.3.0",
+          "published": true
+        }
+      }
+    },
+    {
+      "id": "uniwind",
+      "library": "Uniwind",
+      "package": "uniwind",
+      "version": "1.12.0",
+      "label": "Uniwind 1.12.0",
+      "ios": {
+        "median": 60.7,
+        "ratioToStyleSheet": 1.63,
+        "spread": [
+          60.02,
+          62.15
+        ],
+        "warmLaunches": [
+          62.15,
+          60.31,
+          61.49,
+          60.6,
+          60.79,
+          60.02
+        ],
+        "controls": [
+          38.4,
+          37.58,
+          38.62,
+          37.56
+        ],
+        "measuredOn": "2026-10-01",
+        "note": "Measured on 2026-10-01 on iPhone 18 Pro Max simulator, iOS 27.0 with scripts/bench/measure.py (2 sweeps x 3 warm launches). StyleSheet controls median 37.99 ms, +1.9% vs the StyleSheet median 37.28 ms.",
+        "memory": {
+          "median": 111.5,
+          "peak": 151.3,
+          "spread": [
+            110.5,
+            117.0
+          ],
+          "launches": [
+            117.0,
+            110.5,
+            111.2,
+            111.8,
+            112.7,
+            110.6
+          ],
+          "controls": [
+            75.6,
+            74.7,
+            73.3,
+            71.6
+          ],
+          "controlMedian": 74.0
+        },
+        "build": {
+          "version": "1.12.0",
+          "spec": "1.12.0",
+          "published": true
+        }
+      },
+      "android": {
+        "median": 78.24,
+        "ratioToStyleSheet": 1.31,
+        "spread": [
+          75.36,
+          90.86
+        ],
+        "warmLaunches": [
+          84.35,
+          76.88,
+          75.36,
+          76.44,
+          79.6,
+          90.86
+        ],
+        "controls": [
+          63.77,
+          58.09,
+          63.27,
+          63.94
+        ],
+        "measuredOn": "2026-10-01",
+        "note": "Measured on 2026-10-01 on Pixel_9a AVD, Android 16 (API 36) with scripts/bench/measure.py (2 sweeps x 3 warm launches). StyleSheet controls median 63.52 ms, +6.0% vs the StyleSheet median 59.95 ms.",
+        "memory": {
+          "median": 173.05,
+          "spread": [
+            171.9,
+            173.9
+          ],
+          "launches": [
+            173.9,
+            172.8,
+            173.3,
+            171.9,
+            173.4,
+            172.4
+          ],
+          "controls": [
+            200.5,
+            189.5,
+            186.4,
+            173.3
+          ],
+          "controlMedian": 187.95,
+          "breakdown": {
+            "Java Heap": 13.9,
+            "Native Heap": 112.95,
+            "Code": 20.0,
+            "Stack": 0.5,
+            "Graphics": 0.0,
+            "Private Other": 21.6,
+            "System": 3.9
+          }
+        },
+        "build": {
+          "version": "1.12.0",
+          "spec": "1.12.0",
+          "published": true
+        },
+        "normalized": {
+          "median": 73.84,
+          "ratioToStyleSheet": 1.23,
+          "note": "Merged with --allow-drift: controls drifted +6.0%. normalized = median scaled by StyleSheet median / controls median."
+        }
+      }
+    },
+    {
+      "id": "nativewind4",
+      "library": "NativeWind",
+      "package": "nativewind",
+      "version": "4.2.7",
+      "label": "NativeWind 4.2.7",
+      "ios": {
+        "median": 138.12,
+        "ratioToStyleSheet": 3.7,
+        "spread": [
+          137.14,
+          140.87
+        ],
+        "warmLaunches": [
+          140.87,
+          139.46,
+          137.14,
+          137.61,
+          138.31,
+          137.94
+        ],
+        "controls": [
+          40.01,
+          37.5,
+          38.38,
+          37.17
+        ],
+        "measuredOn": "2026-10-01",
+        "note": "Measured on 2026-10-01 on iPhone 18 Pro Max simulator, iOS 27.0 with scripts/bench/measure.py (2 sweeps x 3 warm launches). StyleSheet controls median 37.94 ms, +1.8% vs the StyleSheet median 37.28 ms.",
+        "memory": {
+          "median": 124.8,
+          "peak": 158.15,
+          "spread": [
+            121.0,
+            126.0
+          ],
+          "launches": [
+            124.3,
+            125.8,
+            125.3,
+            126.0,
+            121.9,
+            121.0
+          ],
+          "controls": [
+            75.0,
+            72.2,
+            73.4,
+            72.7
+          ],
+          "controlMedian": 73.05
+        },
+        "build": {
+          "version": "4.2.7",
+          "spec": "4.2.7",
+          "published": true
+        }
+      },
+      "android": {
+        "median": 174.8,
+        "ratioToStyleSheet": 2.92,
+        "spread": [
+          173.38,
+          202.14
+        ],
+        "warmLaunches": [
+          174.57,
+          173.38,
+          176.48,
+          202.14,
+          174.44,
+          175.03
+        ],
+        "controls": [
+          58.91,
+          58.46,
+          59.47,
+          61.46
+        ],
+        "measuredOn": "2026-10-01",
+        "note": "Measured on 2026-10-01 on Pixel_9a AVD, Android 16 (API 36) with scripts/bench/measure.py (2 sweeps x 3 warm launches). StyleSheet controls median 59.19 ms, -1.3% vs the StyleSheet median 59.95 ms.",
+        "memory": {
+          "median": 184.55,
+          "spread": [
+            182.3,
+            192.6
+          ],
+          "launches": [
+            184.2,
+            182.3,
+            184.4,
+            192.6,
+            184.7,
+            185.4
+          ],
+          "controls": [
+            187.9,
+            189.2,
+            188.3,
+            185.8
+          ],
+          "controlMedian": 188.1,
+          "breakdown": {
+            "Java Heap": 12.4,
+            "Native Heap": 105.3,
+            "Code": 21.05,
+            "Stack": 0.5,
+            "Graphics": 0.0,
+            "Private Other": 41.65,
+            "System": 3.8
+          }
+        },
+        "build": {
+          "version": "4.2.7",
+          "spec": "4.2.7",
+          "published": true
+        }
+      }
+    },
+    {
+      "id": "nativewind5",
+      "library": "NativeWind",
+      "package": "nativewind",
+      "version": "5.0.0-rc.0",
+      "label": "NativeWind 5.0.0-rc.0",
+      "ios": {
+        "median": 322.69,
+        "ratioToStyleSheet": 8.66,
+        "spread": [
+          301.79,
+          353.01
+        ],
+        "warmLaunches": [
+          301.79,
+          353.01,
+          308.47,
+          336.43,
+          308.96,
+          340.33
+        ],
+        "controls": [
+          38.29,
+          39.94,
+          38.92,
+          37.74
+        ],
+        "measuredOn": "2026-10-01",
+        "note": "Measured on 2026-10-01 on iPhone 18 Pro Max simulator, iOS 27.0 with scripts/bench/measure.py (2 sweeps x 3 warm launches). StyleSheet controls median 38.61 ms, +3.6% vs the StyleSheet median 37.28 ms.",
+        "memory": {
+          "median": 129.45,
+          "peak": 160.85,
+          "spread": [
+            126.4,
+            133.2
+          ],
+          "launches": [
+            133.2,
+            126.4,
+            129.2,
+            129.7,
+            128.9,
+            130.7
+          ],
+          "controls": [
+            74.6,
+            74.9,
+            72.4,
+            75.0
+          ],
+          "controlMedian": 74.75
+        },
+        "build": {
+          "version": "5.0.0-rc.0",
+          "spec": "5.0.0-rc.0",
+          "published": true
+        }
+      },
+      "android": {
+        "median": 367.51,
+        "ratioToStyleSheet": 6.13,
+        "spread": [
+          361.19,
+          375.08
+        ],
+        "warmLaunches": [
+          367.69,
+          366.74,
+          375.08,
+          361.19,
+          367.82,
+          367.34
+        ],
+        "controls": [
+          58.68,
+          62.93,
+          56.75,
+          58.77
+        ],
+        "measuredOn": "2026-10-01",
+        "note": "Measured on 2026-10-01 on Pixel_9a AVD, Android 16 (API 36) with scripts/bench/measure.py (2 sweeps x 3 warm launches). StyleSheet controls median 58.73 ms, -2.0% vs the StyleSheet median 59.95 ms.",
+        "memory": {
+          "median": 198.85,
+          "spread": [
+            189.2,
+            206.3
+          ],
+          "launches": [
+            206.3,
+            197.7,
+            191.2,
+            189.2,
+            205.5,
+            200.0
+          ],
+          "controls": [
+            187.7,
+            178.3,
+            189.6,
+            187.5
+          ],
+          "controlMedian": 187.6,
+          "breakdown": {
+            "Java Heap": 13.7,
+            "Native Heap": 111.6,
+            "Code": 29.4,
+            "Stack": 0.6,
+            "Graphics": 0.0,
+            "Private Other": 37.8,
+            "System": 3.85
+          }
+        },
+        "build": {
+          "version": "5.0.0-rc.0",
+          "spec": "5.0.0-rc.0",
+          "published": true
+        }
+      }
+    },
+    {
+      "id": "pro-1.0.1",
+      "library": "Uniwind Pro",
+      "package": "uniwind-pro",
+      "version": "1.0.1",
+      "label": "Uniwind Pro 1.0.1",
+      "ios": {
+        "median": 48.77,
+        "ratioToStyleSheet": 1.31,
+        "spread": [
+          48.12,
+          49.48
+        ],
+        "warmLaunches": [
+          48.98,
+          48.31,
+          49.48,
+          49.25,
+          48.12,
+          48.55
+        ],
+        "controls": [
+          39.16,
+          37.83,
+          39.14,
+          36.98
+        ],
+        "measuredOn": "2026-10-01",
+        "note": "Measured on 2026-10-01 on iPhone 18 Pro Max simulator, iOS 27.0 with scripts/bench/measure.py (2 sweeps x 3 warm launches). StyleSheet controls median 38.48 ms, +3.2% vs the StyleSheet median 37.28 ms.",
+        "memory": {
+          "median": 113.9,
+          "peak": 182.55,
+          "spread": [
+            108.6,
+            115.7
+          ],
+          "launches": [
+            115.2,
+            113.9,
+            113.9,
+            113.7,
+            108.6,
+            115.7
+          ],
+          "controls": [
+            73.1,
+            74.1,
+            72.5,
+            72.6
+          ],
+          "controlMedian": 72.85
+        },
+        "build": {
+          "version": "1.0.1",
+          "spec": "npm:uniwind-pro@1.0.1",
+          "published": true
+        }
+      },
+      "android": {
+        "median": 72.0,
+        "ratioToStyleSheet": 1.2,
+        "spread": [
+          71.55,
+          72.97
+        ],
+        "warmLaunches": [
+          72.63,
+          71.55,
+          72.0,
+          71.59,
+          72.97,
+          72.01
+        ],
+        "controls": [
+          58.6,
+          57.33,
+          58.34,
+          58.96
+        ],
+        "measuredOn": "2026-10-01",
+        "note": "Measured on 2026-10-01 on Pixel_9a AVD, Android 16 (API 36) with scripts/bench/measure.py (2 sweeps x 3 warm launches). StyleSheet controls median 58.47 ms, -2.5% vs the StyleSheet median 59.95 ms.",
+        "memory": {
+          "median": 201.35,
+          "spread": [
+            191.0,
+            202.0
+          ],
+          "launches": [
+            191.0,
+            201.1,
+            191.9,
+            201.6,
+            201.9,
+            202.0
+          ],
+          "controls": [
+            187.0,
+            186.7,
+            184.7,
+            187.3
+          ],
+          "controlMedian": 186.85,
+          "breakdown": {
+            "Java Heap": 12.9,
+            "Native Heap": 136.1,
+            "Code": 25.6,
+            "Stack": 0.5,
+            "Graphics": 0.0,
+            "Private Other": 22.55,
+            "System": 3.6
+          }
+        },
+        "build": {
+          "version": "1.0.1",
+          "spec": "npm:uniwind-pro@1.0.1",
+          "published": true
+        }
+      }
+    },
+    {
+      "id": "pro-1.8.0",
+      "library": "Uniwind Pro",
+      "package": "uniwind-pro",
+      "version": "1.8.0",
+      "label": "Uniwind Pro 1.8.0",
+      "unreleased": true,
+      "branch": "main",
+      "note": "Unreleased, release candidate: uniwind-pro main at e210e4c5 (includes perf/lean-host-props and feature/glitches), built like the release workflow and packed as a tarball with the version set to 1.8.0. Measured on iOS and Android on 2026-10-01.",
+      "ios": {
+        "median": 45.66,
+        "ratioToStyleSheet": 1.22,
+        "spread": [
+          45.11,
+          48.76
+        ],
+        "warmLaunches": [
+          48.76,
+          45.48,
+          45.53,
+          45.11,
+          46.93,
+          45.8
+        ],
+        "controls": [
+          39.24,
+          38.34,
+          38.86,
+          37.3
+        ],
+        "measuredOn": "2026-10-01",
+        "note": "Measured on 2026-10-01 on iPhone 18 Pro Max simulator, iOS 27.0 with scripts/bench/measure.py (2 sweeps x 3 warm launches). StyleSheet controls median 38.6 ms, +3.5% vs the StyleSheet median 37.28 ms.",
+        "memory": {
+          "median": 105.4,
+          "peak": 176.25,
+          "spread": [
+            103.8,
+            109.5
+          ],
+          "launches": [
+            103.8,
+            106.2,
+            109.1,
+            109.5,
+            104.6,
+            104.0
+          ],
+          "controls": [
+            73.6,
+            72.2,
+            73.6,
+            74.5
+          ],
+          "controlMedian": 73.6
+        },
+        "build": {
+          "version": "1.8.0",
+          "spec": "file:/Users/jpudysz/.t3/worktrees/uniwind-benchmarks/t3code-8cfedf29/.bench/pro/uniwind-pro-1.8.0.tgz",
+          "published": false
+        }
+      },
+      "android": {
+        "median": 67.54,
+        "ratioToStyleSheet": 1.13,
+        "spread": [
+          66.49,
+          81.08
+        ],
+        "warmLaunches": [
+          67.87,
+          70.06,
+          66.74,
+          66.49,
+          67.21,
+          81.08
+        ],
+        "controls": [
+          59.77,
+          58.14,
+          59.62,
+          58.95
+        ],
+        "measuredOn": "2026-10-01",
+        "note": "Measured on 2026-10-01 on Pixel_9a AVD, Android 16 (API 36) with scripts/bench/measure.py (2 sweeps x 3 warm launches). StyleSheet controls median 59.28 ms, -1.1% vs the StyleSheet median 59.95 ms.",
+        "memory": {
+          "median": 173.75,
+          "spread": [
+            170.7,
+            187.7
+          ],
+          "launches": [
+            171.1,
+            170.7,
+            171.6,
+            175.9,
+            178.4,
+            187.7
+          ],
+          "controls": [
+            188.4,
+            197.4,
+            178.4,
+            187.4
+          ],
+          "controlMedian": 187.9,
+          "breakdown": {
+            "Java Heap": 12.5,
+            "Native Heap": 108.85,
+            "Code": 25.85,
+            "Stack": 0.5,
+            "Graphics": 0.0,
+            "Private Other": 22.5,
+            "System": 3.6
+          }
+        },
+        "build": {
+          "version": "1.8.0",
+          "spec": "file:/Users/jpudysz/.t3/worktrees/uniwind-benchmarks/t3code-8cfedf29/.bench/pro/uniwind-pro-1.8.0.tgz",
+          "published": false
+        }
+      }
+    }
+  ],
+  "memoryMetrics": {
+    "ios": {
+      "total": "phys_footprint after a simulated memory warning (footprint)",
+      "peak": "phys_footprint_peak before the memory warning (footprint)",
+      "unit": "MiB"
+    },
+    "android": {
+      "total": "TOTAL PSS after trim-memory RUNNING_CRITICAL (dumpsys meminfo)",
+      "peak": null,
+      "unit": "MiB"
+    }
+  }
+}
