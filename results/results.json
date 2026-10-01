@@ -1,0 +1,608 @@
+{
+  "date": "2026-09-29",
+  "host": {
+    "chip": "Apple M3 Pro",
+    "os": "macOS 27.0"
+  },
+  "devices": {
+    "ios": {
+      "model": "iPhone 18 Pro Max simulator",
+      "os": "iOS 27.0"
+    },
+    "android": {
+      "model": "Pixel_9a AVD",
+      "os": "Android 16 (API 36)",
+      "abi": "arm64-v8a",
+      "image": "google_apis_playstore",
+      "ram": "4 GB",
+      "cores": 4,
+      "bootFlags": "-no-snapshot-load -no-audio -memory 4096 -no-window -gpu host"
+    }
+  },
+  "method": "Release builds (Hermes, New Architecture), no rebuild during measurement. Host gate: 1-minute load average below 6 before every launch. Per block: StyleSheet warm control, install the app, 1 cold launch discarded, 3 warm launches (terminate + relaunch), StyleSheet warm control. A block is accepted only if both controls are within 20% of the session baseline (median of the first 3 StyleSheet warm launches). The result is read once, 10 s after launch. Two sweeps: A in the order listed in configs, B reversed. warmLaunches lists sweep A then sweep B; median = median of those 6 values. Android emulator runs windowless because a hidden emulator window is throttled by macOS App Nap.",
+  "sessionBaseline": {
+    "ios": 36.75,
+    "android": 50.98
+  },
+  "configs": [
+    {
+      "id": "stylesheet",
+      "library": "StyleSheet",
+      "package": "react-native",
+      "version": "0.86.3",
+      "label": "StyleSheet",
+      "ios": {
+        "median": 36.81,
+        "ratioToStyleSheet": 1.0,
+        "spread": [
+          36.01,
+          38.24
+        ],
+        "warmLaunches": [
+          38.24,
+          37.04,
+          36.94,
+          36.69,
+          36.38,
+          36.01
+        ]
+      },
+      "android": {
+        "median": 49.46,
+        "ratioToStyleSheet": 1.0,
+        "spread": [
+          48.38,
+          50.47
+        ],
+        "warmLaunches": [
+          49.78,
+          50.47,
+          50.25,
+          48.8,
+          49.14,
+          48.38
+        ]
+      }
+    },
+    {
+      "id": "unistyles",
+      "library": "Unistyles",
+      "package": "react-native-unistyles",
+      "version": "3.3.0",
+      "label": "Unistyles 3.3.0",
+      "ios": {
+        "median": 52.66,
+        "ratioToStyleSheet": 1.43,
+        "spread": [
+          51.84,
+          54.39
+        ],
+        "warmLaunches": [
+          53.07,
+          54.37,
+          54.39,
+          51.84,
+          51.98,
+          52.25
+        ]
+      },
+      "android": {
+        "median": 63.48,
+        "ratioToStyleSheet": 1.28,
+        "spread": [
+          62.73,
+          64.01
+        ],
+        "warmLaunches": [
+          63.36,
+          63.6,
+          63.83,
+          63.22,
+          64.01,
+          62.73
+        ]
+      }
+    },
+    {
+      "id": "uniwind",
+      "library": "Uniwind",
+      "package": "uniwind",
+      "version": "1.12.0",
+      "label": "Uniwind 1.12.0",
+      "ios": {
+        "median": 59.67,
+        "ratioToStyleSheet": 1.62,
+        "spread": [
+          58.0,
+          62.1
+        ],
+        "warmLaunches": [
+          62.1,
+          61.85,
+          59.92,
+          58.0,
+          58.73,
+          59.43
+        ]
+      },
+      "android": {
+        "median": 64.72,
+        "ratioToStyleSheet": 1.31,
+        "spread": [
+          63.68,
+          65.06
+        ],
+        "warmLaunches": [
+          64.76,
+          63.68,
+          65.06,
+          65.02,
+          64.68,
+          63.78
+        ]
+      }
+    },
+    {
+      "id": "nativewind4",
+      "library": "NativeWind",
+      "package": "nativewind",
+      "version": "4.2.7",
+      "label": "NativeWind 4.2.7",
+      "ios": {
+        "median": 137.65,
+        "ratioToStyleSheet": 3.74,
+        "spread": [
+          134.6,
+          142.99
+        ],
+        "warmLaunches": [
+          141.44,
+          139.63,
+          142.99,
+          135.53,
+          134.6,
+          135.67
+        ]
+      },
+      "android": {
+        "median": 156.66,
+        "ratioToStyleSheet": 3.17,
+        "spread": [
+          155.05,
+          157.35
+        ],
+        "warmLaunches": [
+          155.05,
+          156.69,
+          156.83,
+          156.63,
+          155.85,
+          157.35
+        ]
+      }
+    },
+    {
+      "id": "nativewind5",
+      "library": "NativeWind",
+      "package": "nativewind",
+      "version": "5.0.0-rc.0",
+      "label": "NativeWind 5.0.0-rc.0",
+      "ios": {
+        "median": 309.75,
+        "ratioToStyleSheet": 8.41,
+        "spread": [
+          299.03,
+          328.23
+        ],
+        "warmLaunches": [
+          300.08,
+          302.95,
+          316.56,
+          299.03,
+          328.23,
+          319.65
+        ]
+      },
+      "android": {
+        "median": 325.44,
+        "ratioToStyleSheet": 6.58,
+        "spread": [
+          321.94,
+          330.4
+        ],
+        "warmLaunches": [
+          330.4,
+          329.42,
+          325.72,
+          323.15,
+          325.15,
+          321.94
+        ]
+      }
+    },
+    {
+      "id": "pro-1.0.1",
+      "library": "Uniwind Pro",
+      "package": "uniwind-pro",
+      "version": "1.0.1",
+      "label": "Uniwind Pro 1.0.1",
+      "ios": {
+        "median": 48.03,
+        "ratioToStyleSheet": 1.3,
+        "spread": [
+          47.09,
+          49.04
+        ],
+        "warmLaunches": [
+          48.87,
+          49.04,
+          48.49,
+          47.57,
+          47.26,
+          47.09
+        ]
+      },
+      "android": {
+        "median": 61.14,
+        "ratioToStyleSheet": 1.24,
+        "spread": [
+          60.5,
+          62.38
+        ],
+        "warmLaunches": [
+          61.0,
+          61.05,
+          61.48,
+          62.38,
+          61.24,
+          60.5
+        ]
+      }
+    },
+    {
+      "id": "pro-1.7.0",
+      "library": "Uniwind Pro",
+      "package": "uniwind-pro",
+      "version": "1.7.0",
+      "label": "Uniwind Pro 1.7.0",
+      "ios": {
+        "median": 57.52,
+        "ratioToStyleSheet": 1.56,
+        "spread": [
+          57.05,
+          58.19
+        ],
+        "warmLaunches": [
+          57.95,
+          57.2,
+          57.05,
+          58.19,
+          57.58,
+          57.45
+        ]
+      },
+      "android": {
+        "median": 67.81,
+        "ratioToStyleSheet": 1.37,
+        "spread": [
+          67.05,
+          68.69
+        ],
+        "warmLaunches": [
+          67.93,
+          68.27,
+          67.66,
+          67.68,
+          68.69,
+          67.05
+        ]
+      }
+    },
+    {
+      "id": "pro-1.8.0",
+      "library": "Uniwind Pro",
+      "package": "uniwind-pro",
+      "version": "1.8.0",
+      "label": "Uniwind Pro 1.8.0",
+      "unreleased": true,
+      "branch": "perf/lean-host-props",
+      "note": "Unreleased. Local build of uniwind-pro branch perf/lean-host-props at commit 1431d1e0 plus an uncommitted View/Text render optimisation (fewer host props per render), packed as a tarball with the version set to 1.8.0. Re-measured in a separate session with the same method (two blocks of 3 warm launches); StyleSheet was not re-measured, so ratios use the StyleSheet medians above. controls = StyleSheet control launches before and after each accepted block.",
+      "ios": {
+        "median": 44.83,
+        "ratioToStyleSheet": 1.22,
+        "spread": [
+          44.17,
+          45.48
+        ],
+        "warmLaunches": [
+          45.48,
+          45.05,
+          44.62,
+          45.16,
+          44.55,
+          44.17
+        ],
+        "controls": [
+          37.59,
+          36.58,
+          37.86,
+          36.59
+        ]
+      },
+      "android": {
+        "median": 57.91,
+        "ratioToStyleSheet": 1.17,
+        "spread": [
+          57.47,
+          58.58
+        ],
+        "warmLaunches": [
+          57.51,
+          57.47,
+          57.93,
+          57.9,
+          58.07,
+          58.58
+        ],
+        "controls": [
+          50.68,
+          52.22,
+          50.69,
+          50.67
+        ],
+        "note": "Second pass on the same emulator boot. The first pass (median 59.19 ms) was discarded because its StyleSheet controls (median 53.39 ms) were 7.9% above the StyleSheet median of 49.46 ms."
+      },
+      "previous": {
+        "note": "Replaced: first 1.8.0 measurement of this round, built from commit 1431d1e0 without the View/Text render optimisation.",
+        "ios": {
+          "median": 47.41,
+          "ratioToStyleSheet": 1.29,
+          "spread": [
+            47.25,
+            48.26
+          ],
+          "warmLaunches": [
+            48.26,
+            47.66,
+            47.28,
+            47.25,
+            47.34,
+            47.47
+          ]
+        },
+        "android": {
+          "median": 57.87,
+          "ratioToStyleSheet": 1.17,
+          "spread": [
+            56.95,
+            59.21
+          ],
+          "warmLaunches": [
+            58.61,
+            57.78,
+            56.99,
+            57.95,
+            56.95,
+            59.21
+          ]
+        }
+      }
+    }
+  ],
+  "history": [
+    {
+      "date": "2026-09-05",
+      "device": {
+        "ios": "iPhone 17 Pro Max simulator (iOS 26.5), Release build. value = second launch (first warm launch), runs = warm launch averages. StyleSheet control during the Pro re-measurement: 38.28 ms before.",
+        "android": "Pixel 9a emulator (Android 16, arm64-v8a, 4 GB RAM), release build, host under heavy memory pressure from other work (StyleSheet control plateau ~245 ms). value = median of three warm launches accepted only when the StyleSheet control before and after was within ±20% of the plateau."
+      },
+      "platforms": {
+        "ios": [
+          {
+            "label": "StyleSheet",
+            "value": 36.65,
+            "runs": [
+              36.65,
+              36.74
+            ]
+          },
+          {
+            "label": "Unistyles 3.3.0",
+            "value": 53.35,
+            "runs": [
+              53.35,
+              52.61
+            ]
+          },
+          {
+            "label": "Uniwind 1.12.0",
+            "value": 59.41,
+            "runs": [
+              59.41,
+              59.75
+            ]
+          },
+          {
+            "label": "Uniwind Pro 1.7.0",
+            "value": 58.51,
+            "runs": [
+              58.51,
+              62.16,
+              59.73
+            ],
+            "note": "clean protocol (launch via simctl, read after completion); earlier tool-driven launches: 57.73, 58.14"
+          },
+          {
+            "label": "Uniwind Pro 1.3.0",
+            "value": 52.42,
+            "runs": [
+              52.42,
+              51.91,
+              52.73
+            ],
+            "note": "clean protocol; earlier tool-driven launches: 51.17, 51.67"
+          },
+          {
+            "label": "Uniwind Pro 1.0.1",
+            "value": 50.19,
+            "runs": [
+              50.19,
+              51.83,
+              50.5
+            ],
+            "note": "clean protocol; earlier tool-driven launches: 49.16, 49.33"
+          },
+          {
+            "label": "Nativewind 4.2.6",
+            "value": 138.19,
+            "runs": [
+              138.19,
+              137.42
+            ]
+          },
+          {
+            "label": "Nativewind 5 preview.4",
+            "value": 239.29,
+            "runs": [
+              239.29,
+              248.29
+            ]
+          }
+        ],
+        "android": [
+          {
+            "label": "StyleSheet",
+            "value": 254.78,
+            "runs": [
+              262.69,
+              254.78,
+              247.39
+            ]
+          },
+          {
+            "label": "Unistyles 3.3.0",
+            "value": 324.74,
+            "runs": [
+              324.74,
+              294.55,
+              326.22
+            ]
+          },
+          {
+            "label": "Uniwind 1.12.0",
+            "value": 340.23,
+            "runs": [
+              340.23,
+              351.54,
+              308.65
+            ]
+          },
+          {
+            "label": "Uniwind Pro 1.0.1",
+            "value": 309.1,
+            "runs": [
+              309.1,
+              302.98,
+              317.75
+            ]
+          },
+          {
+            "label": "Uniwind Pro 1.3.0",
+            "value": 326.99,
+            "runs": [
+              326.99,
+              367.57,
+              319.76
+            ]
+          },
+          {
+            "label": "Uniwind Pro 1.7.0",
+            "value": 383.76,
+            "runs": [
+              383.76,
+              408.45,
+              362.17
+            ]
+          },
+          {
+            "label": "Nativewind 4.2.6",
+            "value": 776.11,
+            "runs": [
+              548.88,
+              799.23,
+              776.11
+            ]
+          },
+          {
+            "label": "Nativewind 5 preview.4",
+            "value": 971.11,
+            "runs": [
+              819.94,
+              971.11,
+              1251.32
+            ]
+          }
+        ]
+      },
+      "android_quiet_host_partial": {
+        "note": "Earlier session on the same emulator while the host was idle (StyleSheet control ~56 ms). Only six configurations could be measured before the host became busy; kept for reference.",
+        "values": [
+          {
+            "label": "StyleSheet",
+            "value": 56.35,
+            "runs": [
+              56.04,
+              57.52,
+              56.35
+            ]
+          },
+          {
+            "label": "Unistyles 3.3.0",
+            "value": 72.02,
+            "runs": [
+              72.02,
+              71.38,
+              73.13
+            ]
+          },
+          {
+            "label": "Uniwind 1.12.0",
+            "value": 76.43,
+            "runs": [
+              85.17,
+              74.47,
+              76.43
+            ]
+          },
+          {
+            "label": "Uniwind Pro 1.0.1",
+            "value": 71.97,
+            "runs": [
+              71.26,
+              72.76,
+              71.97
+            ]
+          },
+          {
+            "label": "Nativewind 4.2.6",
+            "value": 169.67,
+            "runs": [
+              169.14,
+              170.56,
+              169.67
+            ]
+          },
+          {
+            "label": "Nativewind 5 preview.4",
+            "value": 276.93,
+            "runs": [
+              257.39,
+              276.93,
+              280.83
+            ]
+          }
+        ]
+      }
+    }
+  ]
+}

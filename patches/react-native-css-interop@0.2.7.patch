@@ -1,0 +1,14 @@
+diff --git a/dist/metro/expo.js b/dist/metro/expo.js
+index aef75e4f949534740d5411f58b0d4fb293e3e867..c03300040dde079d62e7d4e17c7cb7c23d6817d0 100644
+--- a/dist/metro/expo.js
++++ b/dist/metro/expo.js
+@@ -12,6 +12,9 @@ function expoColorSchemeWarning() {
+ }
+ function isExpo() {
+     try {
++        // Only treat the project as Expo when the `expo` package itself is installed in it.
++        // `@expo/config` alone can leak in from a monorepo store and would throw for bare apps.
++        require.resolve("expo", { paths: [process.cwd()] });
+         require("@expo/config");
+         return true;
+     }

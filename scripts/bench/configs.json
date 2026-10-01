@@ -1,0 +1,128 @@
+{
+  "comment": "Benchmark configs, in sweep order. ids match results/results.json. version is read from <app>/node_modules/<versionModule>. label is a template ({library}, {version}). pro.version: the Uniwind Pro version this id stands for (switched with scripts/use-pro.sh, never by the bench scripts). pro.hideExpoMetroConfig: this Pro version needs @expo/metro-config hidden (use-pro.sh does it).",
+  "configs": [
+    {
+      "id": "stylesheet",
+      "library": "StyleSheet",
+      "package": "react-native",
+      "label": "StyleSheet",
+      "app": "apps/stylesheet",
+      "versionModule": "react-native",
+      "expo": false,
+      "ios": {
+        "workspace": "stylesheet",
+        "scheme": "stylesheet",
+        "bundleId": "org.reactjs.native.example.stylesheet"
+      },
+      "android": { "packageId": "com.stylesheet" }
+    },
+    {
+      "id": "unistyles",
+      "library": "Unistyles",
+      "package": "react-native-unistyles",
+      "label": "{library} {version}",
+      "app": "apps/unistyles3",
+      "versionModule": "react-native-unistyles",
+      "expo": false,
+      "ios": {
+        "workspace": "unistyles3",
+        "scheme": "unistyles3",
+        "bundleId": "org.reactjs.native.example.unistyles3"
+      },
+      "android": { "packageId": "com.unistyles3" }
+    },
+    {
+      "id": "uniwind",
+      "library": "Uniwind",
+      "package": "uniwind",
+      "label": "{library} {version}",
+      "app": "apps/uniwind",
+      "versionModule": "uniwind",
+      "expo": false,
+      "ios": {
+        "workspace": "uniwind",
+        "scheme": "uniwind",
+        "bundleId": "org.reactjs.native.example.uniwind"
+      },
+      "android": { "packageId": "com.uniwind" }
+    },
+    {
+      "id": "nativewind4",
+      "library": "NativeWind",
+      "package": "nativewind",
+      "label": "{library} {version}",
+      "app": "apps/nativewind4",
+      "versionModule": "nativewind",
+      "expo": false,
+      "ios": {
+        "workspace": "nativewind4",
+        "scheme": "nativewind4",
+        "bundleId": "org.reactjs.native.example.nativewind4"
+      },
+      "android": { "packageId": "com.nativewind4" }
+    },
+    {
+      "id": "nativewind5",
+      "library": "NativeWind",
+      "package": "nativewind",
+      "label": "{library} {version}",
+      "app": "apps/nativewind5",
+      "versionModule": "nativewind",
+      "expo": true,
+      "ios": {
+        "workspace": "nativewind5",
+        "scheme": "nativewind5",
+        "bundleId": "com.anonymous.nativewind5"
+      },
+      "android": { "packageId": "com.anonymous.nativewind5" }
+    },
+    {
+      "id": "pro-1.0.1",
+      "library": "Uniwind Pro",
+      "package": "uniwind-pro",
+      "label": "{library} {version}",
+      "app": "apps/uniwind-pro",
+      "versionModule": "uniwind",
+      "expo": false,
+      "pro": { "version": "1.0.1", "hideExpoMetroConfig": true },
+      "ios": {
+        "workspace": "uniwindpro",
+        "scheme": "uniwindpro",
+        "bundleId": "org.reactjs.native.example.uniwindpro"
+      },
+      "android": { "packageId": "com.uniwindpro" }
+    },
+    {
+      "id": "pro-1.7.0",
+      "library": "Uniwind Pro",
+      "package": "uniwind-pro",
+      "label": "{library} {version}",
+      "app": "apps/uniwind-pro",
+      "versionModule": "uniwind",
+      "expo": false,
+      "pro": { "version": "1.7.0", "hideExpoMetroConfig": false },
+      "ios": {
+        "workspace": "uniwindpro",
+        "scheme": "uniwindpro",
+        "bundleId": "org.reactjs.native.example.uniwindpro"
+      },
+      "android": { "packageId": "com.uniwindpro" }
+    },
+    {
+      "id": "pro-1.8.0",
+      "library": "Uniwind Pro",
+      "package": "uniwind-pro",
+      "label": "{library} {version}",
+      "app": "apps/uniwind-pro",
+      "versionModule": "uniwind",
+      "expo": false,
+      "pro": { "version": "1.8.0", "hideExpoMetroConfig": false },
+      "ios": {
+        "workspace": "uniwindpro",
+        "scheme": "uniwindpro",
+        "bundleId": "org.reactjs.native.example.uniwindpro"
+      },
+      "android": { "packageId": "com.uniwindpro" }
+    }
+  ]
+}
