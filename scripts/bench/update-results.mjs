@@ -1,10 +1,13 @@
 // Merge measure.py runs into results/results.json, then regenerate the README tables and charts.
 //
 // Usage: node scripts/bench/update-results.mjs <run.json...> [--allow-drift] [--allow-incomplete]
-//          [--results <file>] [--readme <file>] [--assets <dir>] [--no-charts] [--dry-run]
+//          [--skip-memory <platform>] [--results <file>] [--readme <file>] [--assets <dir>] [--no-charts] [--dry-run]
+//
+// A config measured in several run files takes the last file's numbers (e.g. a full round followed by a
+// re-measurement of one config whose block drifted). --skip-memory leaves a platform's memory out.
 //
 // Per measured config and platform: median, ratio against the StyleSheet median already in results.json,
-// spread, accepted warm launches, StyleSheet controls and a device/date note. The replaced entry is kept
+// spread, accepted warm launches, StyleSheet controls, memory (when the run recorded it) and a device/date note. The replaced entry is kept
 // under `previous`. version/label follow the measured build; `unreleased`, `branch` and `note` are
 // cleared once every platform of the config was measured from a published (npm) version.
 //
@@ -33,6 +36,7 @@ const { values: opts, positionals: files } = parseArgs({
     assets: { type: 'string', default: join(root, 'assets') },
     'no-charts': { type: 'boolean', default: false },
     'dry-run': { type: 'boolean', default: false },
+    'skip-memory': { type: 'string', multiple: true, default: [] },
   },
 })
 
@@ -61,8 +65,10 @@ for (const file of files) {
     continue
   }
   for (const [id, r] of Object.entries(run.results)) {
-    if (measured.some((m) => m.id === id && m.platform === run.platform)) {
-      errors.push(`${id} ${run.platform} is measured in more than one run file`)
+    const earlier = measured.findIndex((m) => m.id === id && m.platform === run.platform)
+    if (earlier !== -1) {
+      console.log(`${id} ${run.platform}: using ${file}, not the earlier ${measured[earlier].file}`)
+      measured.splice(earlier, 1)
     }
     if (!r.n) errors.push(`${file}: ${id} has no accepted warm launches`)
     else if (!r.complete && !opts['allow-incomplete']) {
@@ -136,6 +142,22 @@ const entryFor = (m) => {
     measuredOn: date,
     note: `Measured on ${date} on ${device} with scripts/bench/measure.py (${s.sweeps} sweeps x ${s.launches} warm launches). StyleSheet controls median ${r.controlMedian} ms, ${pct(m.drift)} vs the StyleSheet median ${m.ref} ms.`,
   }
+  if (r.memory && !opts['skip-memory'].includes(m.platform)) {
+    const { median, peak, spread, launches, controls, controlMedian, breakdown } = r.memory
+    entry.memory = {
+      median,
+      ...(peak ? { peak } : {}),
+      spread,
+      launches,
+      controls,
+      controlMedian,
+      ...(breakdown ? { breakdown } : {}),
+    }
+  } else if (!r.memory) {
+    warnings.push(
+      `${m.id} ${m.platform}: the run has no memory readings, the entry will have no memory`
+    )
+  }
   if (r.build?.version) {
     entry.build = { version: r.build.version, spec: r.build.spec, published: r.build.published }
   }
@@ -203,6 +225,11 @@ for (const [id, ms] of byConfig) {
   if (hasPrevious) config.previous = previous
 }
 
+for (const m of measured) {
+  if (m.run.memoryMetrics && !opts['skip-memory'].includes(m.platform))
+    results.memoryMetrics = { ...results.memoryMetrics, [m.platform]: m.run.memoryMetrics }
+}
+
 for (const platform of PLATFORMS) {
   const ss = measured.find((m) => m.platform === platform && m.id === 'stylesheet')
   if (ss?.run.baseline?.source?.startsWith('rebaseline')) {
@@ -222,7 +249,7 @@ for (const w of warnings) console.warn(`warning: ${w}`)
 for (const m of measured) {
   const e = results.configs.find((c) => c.id === m.id)[m.platform]
   console.log(
-    `${m.id.padEnd(12)} ${m.platform.padEnd(8)} ${String(e.median).padStart(8)} ms  x${e.ratioToStyleSheet.toFixed(2)}  controls ${pct(m.drift)}${e.normalized ? `  normalized ${e.normalized.median} ms` : ''}`
+    `${m.id.padEnd(12)} ${m.platform.padEnd(8)} ${String(e.median).padStart(8)} ms  x${e.ratioToStyleSheet.toFixed(2)}  controls ${pct(m.drift)}${e.normalized ? `  normalized ${e.normalized.median} ms` : ''}${e.memory ? `  memory ${e.memory.median} MB` : ''}`
   )
 }
 
@@ -247,6 +274,19 @@ execFileSync(
   ],
   { stdio: 'inherit' }
 )
+if (!opts['no-charts']) {
+  execFileSync(
+    process.execPath,
+    [
+      join(root, 'scripts', 'generate-memory-chart.mjs'),
+      '--results',
+      opts.results,
+      '--assets',
+      opts.assets,
+    ],
+    { stdio: 'inherit' }
+  )
+}
 console.log(
   'Review README.md prose (dates, notes about unreleased builds) and git diff before committing.'
 )

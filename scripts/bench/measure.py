@@ -12,6 +12,12 @@ Method (see README, Methodology):
     launch produced a result and no launch ran above the load gate (Android: or with a throttled qemu)
   - --sweeps sweeps (default 2), alternating forward and reverse order; a rejected block is retried
   - the result is read once, --wait seconds after launch (inspecting the UI during the run slows it)
+  - after the result, memory is read from outside the (idle) app, so it cannot affect the timing:
+    iOS: the peak phys_footprint (`footprint`, what Xcode's memory gauge and jetsam use) first, then a
+    simulated memory warning, --memory-settle seconds, and phys_footprint. Android: a trim-memory
+    RUNNING_CRITICAL, --memory-settle seconds, then TOTAL PSS and its App Summary (`dumpsys meminfo`).
+    React Native answers both signals with a full Hermes GC; without it the reading depends on when the
+    last GC ran (+-20 MB). Android has no usable peak (VmHWM includes shared pages and is bimodal).
 
 Baseline: the StyleSheet median from results/results.json for the platform, so one library can be
 re-measured without the others. --rebaseline measures StyleSheet warm launches first instead.
@@ -41,6 +47,13 @@ ANDROID_HOME = os.environ.get("ANDROID_HOME", str(Path.home() / "Library/Android
 os.environ["PATH"] = f"{ANDROID_HOME}/platform-tools:{os.environ.get('PATH', '')}"
 
 QEMU_OK_PRIORITY = 31
+MIB = 1024 * 1024
+MEMORY_METRICS = {
+    "ios": {"total": "phys_footprint after a simulated memory warning (footprint)",
+            "peak": "phys_footprint_peak before the memory warning (footprint)", "unit": "MiB"},
+    "android": {"total": "TOTAL PSS after trim-memory RUNNING_CRITICAL (dumpsys meminfo)", "peak": None, "unit": "MiB"},
+}
+ANDROID_SUMMARY = ["Java Heap", "Native Heap", "Code", "Stack", "Graphics", "Private Other", "System"]
 LOAD_GATE_MAX_WAIT_S = 20 * 60
 EMULATOR_FIX = f"""The Android emulator is throttled (qemu threads at priority {{pri}}, expected {QEMU_OK_PRIORITY}).
 macOS App Nap throttles an emulator whose window is hidden (StyleSheet ran ~6x slower), and zsh `&`
@@ -106,7 +119,9 @@ class Runner:
             "settings": {
                 "sweeps": args.sweeps, "launches": args.launches, "waitS": args.wait,
                 "maxLoad": args.max_load, "tolerance": args.tolerance, "attempts": args.attempts,
+                "memorySettleS": args.memory_settle,
             },
+            "memoryMetrics": MEMORY_METRICS[self.platform],
             "configs": args.ids,
             "baseline": None,
             "styleSheetMedian": self.ss_median,
@@ -228,6 +243,48 @@ class Runner:
         self.adb("shell uiautomator dump /sdcard/uwb.xml", timeout=120)
         return re.findall(r' text="([^"]*)"', self.adb("shell cat /sdcard/uwb.xml"))
 
+    def ios_pid(self, pkg):
+        for line in sh(["xcrun", "simctl", "spawn", self.dev, "launchctl", "list"]).splitlines():
+            pid, _, label = (line.split("\t") + ["", ""])[:3]
+            if label.startswith(f"UIKitApplication:{pkg}[") and pid.isdigit():
+                return int(pid)
+        raise RuntimeError(f"{pkg} is not running")
+
+    def ios_footprint(self, pid):
+        out = BENCH / "logs" / "footprint.json"
+        out.parent.mkdir(parents=True, exist_ok=True)
+        sh(["footprint", "-p", str(pid), "-j", str(out)])
+        return json.loads(out.read_text())["processes"][0]
+
+    def read_memory(self, cid):
+        """Memory of the idle app after the run in MiB: total after a forced GC, peak (iOS), breakdown (Android)."""
+        pkg = self.app_id(cid)
+        mb = lambda b: round(b / MIB, 1)
+        if self.platform == "ios":
+            pid = self.ios_pid(pkg)
+            before = self.ios_footprint(pid)["auxiliary"]
+            if not hasattr(self, "memory_warning_file"):
+                self.memory_warning_file = sh(["xcrun", "simctl", "getenv", self.dev, "SIMULATOR_MEMORY_WARNINGS"]).strip()
+            os.utime(self.memory_warning_file, None)  # what Simulator > Simulate Memory Warning does
+            time.sleep(self.a.memory_settle)
+            proc = self.ios_footprint(pid)
+            if proc["pid"] != pid:
+                raise RuntimeError("app restarted during the memory reading")
+            # No breakdown: footprint's categories do not add up to phys_footprint (compressed pages).
+            return {"total": mb(proc["auxiliary"]["phys_footprint"]), "peak": mb(before["phys_footprint_peak"]),
+                    "beforeGc": mb(before["phys_footprint"])}
+        meminfo = lambda: self.adb(f"shell dumpsys meminfo {pkg}")
+        pss = lambda info: round(int(re.search(r"TOTAL PSS:\s+(\d+)", info).group(1)) / 1024, 1)
+        before = pss(meminfo())
+        out = self.adb(f"shell am send-trim-memory {pkg} RUNNING_CRITICAL 2>&1")
+        if "Exception" in out:  # am exits 0 when it rejects the trim level
+            raise RuntimeError(f"send-trim-memory failed: {out.strip().splitlines()[0]}")
+        time.sleep(self.a.memory_settle)
+        info = meminfo()
+        kb = lambda pattern: int(re.search(pattern, info, re.M).group(1))
+        return {"total": pss(info), "peak": None, "beforeGc": before, "rss": round(kb(r"TOTAL RSS:\s+(\d+)") / 1024, 1),
+                "breakdown": {k: round(kb(rf"^\s*{k}:\s+(\d+)") / 1024, 1) for k in ANDROID_SUMMARY}}
+
     @staticmethod
     def parse(texts):
         joined = " | ".join(texts)
@@ -267,16 +324,25 @@ class Runner:
             rec["qemuPriBefore"], rec["qemuPriAfter"] = pri_before, self.qemu_priority()
         if res:
             rec.update(res)
+            try:
+                rec["memory"] = self.read_memory(cid)
+            except Exception as e:  # noqa: BLE001 - a missing reading only rejects the block
+                rec["memory"] = None
+                rec["memoryError"] = str(e)[:300]
         else:
             rec.update({"average": None, "error": "no result", "raw": (raw or "")[:300]})
         self.run["launches"].append(rec)
         self.save()
-        log(f"{sweep:8s} {kind:7s} {cid:12s} avg={rec.get('average')} min={rec.get('min')} max={rec.get('max')} load={load}")
+        mem = rec.get("memory") or {}
+        log(f"{sweep:8s} {kind:7s} {cid:12s} avg={rec.get('average')} min={rec.get('min')} max={rec.get('max')} "
+            f"mem={mem.get('total')} peak={mem.get('peak')} load={load}")
         return rec
 
     def block_ok(self, controls, warm):
         base = self.run["baseline"]["value"]
         reasons = []
+        if any(x.get("memory") is None for x in [*controls, *warm] if x.get("average") is not None):
+            reasons.append("launch without a memory reading")
         for c in controls:
             if c.get("average") is None or abs(c["average"] - base) / base > self.a.tolerance:
                 reasons.append(f"control {c.get('average')} not within {self.a.tolerance:.0%} of baseline {base}")
@@ -350,7 +416,9 @@ class Runner:
                     reasons = self.block_ok([c1, c2], warm)
                     self.run["blocks"].append({"block": blk, "config": cid, "sweep": sweep, "attempt": attempt,
                                                "accepted": not reasons, "reasons": reasons,
-                                               "controls": [c1.get("average"), c2.get("average")], "md5": h})
+                                               "controls": [c1.get("average"), c2.get("average")],
+                                               "controlMemory": [(c.get("memory") or {}).get("total") for c in (c1, c2)],
+                                               "md5": h})
                     self.save()
                     log(f"block {blk} {'accepted' if not reasons else 'REJECTED: ' + '; '.join(reasons)}")
                     if not reasons:
@@ -367,8 +435,9 @@ class Runner:
     def aggregate(self):
         accepted = {b["block"] for b in self.run["blocks"] if b["accepted"]}
         for cid in self.a.ids:
-            warm = [x["average"] for x in self.run["launches"]
-                    if x["block"] in accepted and x["config"] == cid and x["kind"] == "warm"]
+            launches = [x for x in self.run["launches"]
+                        if x["block"] in accepted and x["config"] == cid and x["kind"] == "warm"]
+            warm = [x["average"] for x in launches]
             controls = [c for b in self.run["blocks"] if b["accepted"] and b["config"] == cid for c in b["controls"]]
             sweeps_ok = {b["sweep"] for b in self.run["blocks"] if b["accepted"] and b["config"] == cid}
             m, cm = median(warm), median(controls)
@@ -384,7 +453,31 @@ class Runner:
                 "controlDrift": round(cm / ref - 1, 4) if cm and ref else None,
                 "complete": len(sweeps_ok) == self.a.sweeps,
                 "build": self.run["builds"].get(cid),
+                "memory": self.aggregate_memory(cid, launches),
             }
+
+    def aggregate_memory(self, cid, launches):
+        mems = [x["memory"] for x in launches if x.get("memory")]
+        if not mems:
+            return None
+        totals = [m["total"] for m in mems]
+        controls = [m for b in self.run["blocks"] if b["accepted"] and b["config"] == cid
+                    for m in b.get("controlMemory", []) if m is not None]
+        peaks = [m["peak"] for m in mems if m["peak"] is not None]
+        mem = {
+            "median": median(totals),
+            "peak": median(peaks),
+            "spread": [min(totals), max(totals)],
+            "launches": totals,
+            "peaks": peaks,
+            "beforeGc": median([m["beforeGc"] for m in mems]),
+            "controls": controls,
+            "controlMedian": median(controls),
+        }
+        if self.platform == "android":
+            mem["rss"] = median([m["rss"] for m in mems])
+            mem["breakdown"] = {k: median([m["breakdown"][k] for m in mems]) for k in ANDROID_SUMMARY}
+        return mem
 
     def summary(self):
         ref = self.ss_median
@@ -404,6 +497,17 @@ class Runner:
                   f"{r['controlMedian'] or '-':>9} {drift:>7}  {(r['build'] or {}).get('version')} {' '.join(flags)}")
         rejected = [b["block"] for b in self.run["blocks"] if not b["accepted"]]
         print(f"  rejected blocks: {', '.join(rejected) or 'none'}")
+        m = MEMORY_METRICS[self.platform]
+        print(f"\n  memory [{m['unit']}]: total = {m['total']}" + (f", peak = {m['peak']}" if m["peak"] else ""))
+        print(f"  {'config':12s} {'total':>8s} {'peak':>8s} {'spread':15s} {'controls':>9s} {'vs ctrl':>8s}")
+        for cid, r in self.run["results"].items():
+            mem = r.get("memory")
+            if not mem:
+                print(f"  {cid:12s} {'-':>8s}")
+                continue
+            delta = f"{mem['median'] - mem['controlMedian']:+.1f}" if mem["controlMedian"] is not None else "-"
+            print(f"  {cid:12s} {mem['median']:>8} {mem['peak'] or '-':>8} {mem['spread'][0]}-{mem['spread'][1]:<10} "
+                  f"{mem['controlMedian'] or '-':>9} {delta:>8}")
         print(f"  raw data: {self.out}")
 
 
@@ -424,6 +528,8 @@ def main():
     p.add_argument("--attempts", type=int, default=3, help="attempts per block before giving up (default 3)")
     p.add_argument("--retry-wait", type=float, default=60.0, help="seconds to wait before retrying a rejected block")
     p.add_argument("--out", help="output file (default .bench/runs/<date>-<platform>.json)")
+    p.add_argument("--memory-settle", type=float, default=4.0,
+                   help="seconds between the GC signal (memory warning / trim-memory) and the memory reading (default 4)")
     a = p.parse_args()
     unknown = [i for i in a.ids if i not in ids]
     if unknown:

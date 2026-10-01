@@ -25,6 +25,12 @@ The app shows the average render time of those 10 runs, in milliseconds.
   window is hidden, which made it about 6x slower; those runs were discarded.
 - The result is read from the screen once, 10 seconds after launch. Inspecting the view hierarchy while the benchmark
   is running slows the render loop massively.
+- Memory is read from outside the app after the result, so it does not affect the timing. The app gets a memory warning
+  first (iOS: Simulate Memory Warning, Android: `am send-trim-memory RUNNING_CRITICAL`), which React Native answers with a
+  full Hermes GC; 4 seconds later the reading is taken. Without the GC the number depends on when the last collection ran
+  (about ±20 MB). iOS reports `phys_footprint` (the Xcode memory gauge, what the OS uses to terminate apps) and its peak
+  during the run, Android the `TOTAL PSS` of `dumpsys meminfo`. The reported value is the median of the same 6 warm launches.
+  Simulator/emulator memory is not the memory of a phone; compare the libraries with each other and with StyleSheet.
 
 Uniwind, Uniwind Pro and NativeWind use the exact same classNames.
 
@@ -32,48 +38,89 @@ It’s difficult to directly compare Unistyles, Uniwind, and Nativewind to Style
 
 ## Results
 
-Measured on 2026-09-29.
+Measured on 2026-10-01.
 
 iOS
 
 <!-- results:ios -->
-| Library | Time [ms] | Relative to StyleSheet |
-| --- | --- | --- |
-| StyleSheet | 36.81 | 1.00 |
-| Uniwind Pro 1.8.0 (unreleased, built from perf/lean-host-props) | 44.83 | 1.22 |
-| Uniwind Pro 1.0.1 | 48.03 | 1.30 |
-| Unistyles 3.3.0 | 52.66 | 1.43 |
-| Uniwind Pro 1.7.0 | 57.52 | 1.56 |
-| Uniwind 1.12.0 | 59.67 | 1.62 |
-| NativeWind 4.2.7 | 137.65 | 3.74 |
-| NativeWind 5.0.0-rc.0 | 309.75 | 8.41 |
+| Library | Time [ms] | vs Uniwind 1.12.0 | Relative to StyleSheet |
+| --- | --- | --- | --- |
+| StyleSheet | 37.28 | 1.63x faster | 1.00 |
+| **Uniwind Pro 1.8.0 (unreleased, built from main)** | 45.66 | 1.33x faster | 1.22 |
+| Uniwind Pro 1.0.1 | 48.77 | 1.24x faster | 1.31 |
+| Unistyles 3.3.0 | 53.81 | 1.13x faster | 1.44 |
+| Uniwind 1.12.0 | 60.70 | baseline | 1.63 |
+| NativeWind 4.2.7 | 138.12 | 2.28x slower | 3.70 |
+| NativeWind 5.0.0-rc.0 | 322.69 | 5.32x slower | 8.66 |
 <!-- /results:ios -->
 
 Android
 
 <!-- results:android -->
-| Library | Time [ms] | Relative to StyleSheet |
-| --- | --- | --- |
-| StyleSheet | 49.46 | 1.00 |
-| Uniwind Pro 1.8.0 (unreleased, built from perf/lean-host-props) | 57.91 | 1.17 |
-| Uniwind Pro 1.0.1 | 61.14 | 1.24 |
-| Unistyles 3.3.0 | 63.48 | 1.28 |
-| Uniwind 1.12.0 | 64.72 | 1.31 |
-| Uniwind Pro 1.7.0 | 67.81 | 1.37 |
-| NativeWind 4.2.7 | 156.66 | 3.17 |
-| NativeWind 5.0.0-rc.0 | 325.44 | 6.58 |
+| Library | Time [ms] | vs Uniwind 1.12.0 | Relative to StyleSheet |
+| --- | --- | --- | --- |
+| StyleSheet | 59.95 | 1.31x faster | 1.00 |
+| **Uniwind Pro 1.8.0 (unreleased, built from main)** | 67.54 | 1.16x faster | 1.13 |
+| Uniwind Pro 1.0.1 | 72.00 | 1.09x faster | 1.20 |
+| Unistyles 3.3.0 | 75.16 | 1.04x faster | 1.25 |
+| Uniwind 1.12.0 | 78.24 | baseline | 1.31 |
+| NativeWind 4.2.7 | 174.80 | 2.23x slower | 2.92 |
+| NativeWind 5.0.0-rc.0 | 367.51 | 4.70x slower | 6.13 |
 <!-- /results:android -->
+
+Uniwind's Android blocks ran during a spike in host load: their StyleSheet controls were 6% above the StyleSheet median,
+so its 78.24 ms is probably a little high (scaled by the controls it would be 73.84 ms, kept in `results/results.json`).
+
+### Memory
+
+Memory of the app after the benchmark (2003 views mounted, after a forced GC), in MB (MiB). Peak is the highest iOS
+footprint during the run.
+
+<img src="./assets/memory.jpg" alt="iOS memory">
+
+<img src="./assets/memory-android.jpg" alt="Android memory">
+
+iOS
+
+<!-- memory:ios -->
+| Library | Memory [MB] | vs StyleSheet [MB] | Peak [MB] |
+| --- | --- | --- | --- |
+| StyleSheet | 74.8 | baseline | 134.4 |
+| Unistyles 3.3.0 | 81.1 | +6.3 | 118.1 |
+| **Uniwind Pro 1.8.0 (unreleased, built from main)** | 105.4 | +30.7 | 176.3 |
+| Uniwind 1.12.0 | 111.5 | +36.8 | 151.3 |
+| Uniwind Pro 1.0.1 | 113.9 | +39.2 | 182.6 |
+| NativeWind 4.2.7 | 124.8 | +50.0 | 158.2 |
+| NativeWind 5.0.0-rc.0 | 129.4 | +54.7 | 160.8 |
+<!-- /memory:ios -->
+
+Android
+
+<!-- memory:android -->
+| Library | Memory [MB] | vs StyleSheet [MB] |
+| --- | --- | --- |
+| Unistyles 3.3.0 | 163.4 | -23.6 |
+| Uniwind 1.12.0 | 173.1 | -14.0 |
+| **Uniwind Pro 1.8.0 (unreleased, built from main)** | 173.8 | -13.3 |
+| NativeWind 4.2.7 | 184.6 | -2.5 |
+| StyleSheet | 187.1 | baseline |
+| NativeWind 5.0.0-rc.0 | 198.8 | +11.8 |
+| Uniwind Pro 1.0.1 | 201.3 | +14.3 |
+<!-- /memory:android -->
+
+On Android, StyleSheet comes out above most styling libraries, entirely in the native heap. The readings repeat within a
+few MB, but PSS also counts native memory the allocator keeps after the GC, so treat small Android differences with care;
+the native heap, Java heap and code breakdown per library is in `results/results.json`.
 
 Raw numbers, including every accepted warm launch and the spread per library, live in [`results/results.json`](./results/results.json).
 Earlier rounds are kept in its `history` section. Charts are generated from that file with `node scripts/generate-chart.mjs`.
 
-Screenshots below come from a separate confirmation launch on iOS, so their numbers differ slightly from the medians above.
+Screenshots below come from separate confirmation launches on iOS, so their numbers differ slightly from the medians above.
 
 <img src="./assets/stylesheet.png" width="300" alt="StyleSheet">
 <img src="./assets/unistyles3.png" width="300" alt="Unistyles 3.3.0">
 <img src="./assets/uniwind.png" width="300" alt="Uniwind 1.12.0">
 <img src="./assets/uniwind-pro-1.8.0.png" width="300" alt="Uniwind Pro 1.8.0">
-<img src="./assets/uniwind-pro-1.7.0.png" width="300" alt="Uniwind Pro 1.7.0">
 <img src="./assets/uniwind-pro-1.0.1.png" width="300" alt="Uniwind Pro 1.0.1">
 <img src="./assets/nativewind.png" width="300" alt="NativeWind 4.2.7">
 <img src="./assets/nativewind5.png" width="300" alt="NativeWind 5.0.0-rc.0">
@@ -82,15 +129,13 @@ Screenshots below come from a separate confirmation launch on iOS, so their numb
 
 All Uniwind Pro versions are measured with the same `uniwind-pro` app; only the `uniwind` dependency changes.
 `scripts/use-pro.sh <version>` switches it (package.json, `bun install`, `pod install`). The committed app is pinned to
-the latest release, 1.7.0. There is no `uniwind-pro@1.0.0` on npm, 1.0.1 is the first stable release.
+the latest published release, 1.7.0. There is no `uniwind-pro@1.0.0` on npm, 1.0.1 is the first stable release.
 
-Uniwind Pro 1.8.0 is not published yet. It was measured from a local build of the uniwind-pro branch `perf/lean-host-props`
-(commit `1431d1e0` plus an uncommitted View/Text render optimisation that passes fewer props to host components),
-packed as a tarball with the version set to 1.8.0. It was re-measured in a separate session with the same method
-(two blocks of 3 warm launches, StyleSheet controls within 20% of the session baseline); StyleSheet was not re-measured,
-so its ratio uses the StyleSheet medians above. The numbers of the earlier 1.8.0 build (without that optimisation) are kept
-in `results/results.json` under `previous`. To reproduce, pack a build and run
-`UNIWIND_PRO_TARBALL=/path/to/uniwind-pro-1.8.0.tgz scripts/use-pro.sh 1.8.0`.
+Uniwind Pro 1.8.0 is not published yet; it is the upcoming release. It was measured from uniwind-pro `main` at `e210e4c5`
+(which includes the `perf/lean-host-props` and `feature/glitches` work), built like the release workflow
+(`bun install --linker hoisted`, `bun run build`, `npm pack`) with the version set to 1.8.0. To reproduce, pack a build
+and run `UNIWIND_PRO_TARBALL=/path/to/uniwind-pro-1.8.0.tgz scripts/use-pro.sh 1.8.0`. Uniwind Pro 1.7.0 was dropped from
+the benchmark; its last numbers are kept in the `history` section of `results/results.json`.
 
 This benchmark mounts 2003 fresh views on every run. It does not exercise style updates, theme changes or animations,
 which is where the newer Uniwind Pro releases moved work off the JavaScript thread.
@@ -130,6 +175,7 @@ cd apps/nativewind5 && bunx expo run:ios --configuration Release
 scripts/use-pro.sh 1.0.1
 # Regenerate the charts from results/results.json (requires Google Chrome and ImageMagick)
 node scripts/generate-chart.mjs
+node scripts/generate-memory-chart.mjs   # assets/memory*.jpg; --sample previews the look with made-up values
 ```
 
 Uniwind Pro requires a license; `bun install` downloads the package through the Uniwind Pro CLI credentials.
@@ -181,5 +227,13 @@ git diff                                 # review, then commit
   `previous`, takes version and label from the measured build (a published version clears the `unreleased` flag and note)
   and regenerates the tables and charts. It refuses when the StyleSheet controls drifted more than 5% from the StyleSheet
   median; `--allow-drift` merges anyway and records a normalized value too. `--dry-run` prints the merged JSON only.
+- If one config's block drifted, re-measure only that config (`measure.py <platform> <device> <id> --rebaseline --out …`) and
+  pass both run files; a config measured in several files takes the last file's numbers. `--skip-memory <platform>` merges
+  the timing without that platform's memory.
+- `measure.py` reads memory on every launch, including the StyleSheet controls, and prints a memory summary next to
+  the timing one (`--memory-settle` sets the wait after the GC signal). `update-results.mjs` stores it under
+  `<platform>.memory` in `results.json` and generates the memory tables; their "vs StyleSheet" column needs the
+  StyleSheet entry measured with memory, so do a full round once.
+- The config drawn in bold in the charts is `highlight` in `scripts/bench/configs.json` (default: the latest `uniwind` version).
 - Still manual: the "Measured on" date and the prose above (for example the Uniwind Pro versions section) and the screenshots.
 - A new Uniwind Pro version needs an entry in `scripts/bench/configs.json` (copy `pro-1.8.0`, change `id` and `pro.version`).
