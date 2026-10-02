@@ -16,6 +16,10 @@
 // and also records the value normalized by the controls.
 // StyleSheet itself can only be merged in a full round (every config on that platform), because every
 // other ratio refers to it.
+//
+// Theme scenario runs (measure.py --scenario theme) go to <config>.theme.<platform>: median, spread, warm
+// launches and controls, no ratio to StyleSheet (it has no themes) and no memory. They never change the
+// render entries, version or label; a build version that differs from the config's version is a warning.
 import { execFileSync } from 'node:child_process'
 import { readFileSync } from 'node:fs'
 import { join, resolve } from 'node:path'
@@ -64,10 +68,15 @@ for (const file of files) {
     errors.push(`${file}: not a measure.py run file`)
     continue
   }
+  const scenario = run.scenario ?? 'render'
   for (const [id, r] of Object.entries(run.results)) {
-    const earlier = measured.findIndex((m) => m.id === id && m.platform === run.platform)
+    const earlier = measured.findIndex(
+      (m) => m.id === id && m.platform === run.platform && m.scenario === scenario
+    )
     if (earlier !== -1) {
-      console.log(`${id} ${run.platform}: using ${file}, not the earlier ${measured[earlier].file}`)
+      console.log(
+        `${id} ${run.platform} ${scenario}: using ${file}, not the earlier ${measured[earlier].file}`
+      )
       measured.splice(earlier, 1)
     }
     if (!r.n) errors.push(`${file}: ${id} has no accepted warm launches`)
@@ -76,14 +85,17 @@ for (const file of files) {
         `${file}: ${id} did not get an accepted block in every sweep (--allow-incomplete)`
       )
     }
-    measured.push({ id, platform: run.platform, r, run, file })
+    if (scenario === 'theme' && id === 'stylesheet') {
+      errors.push(`${file}: StyleSheet has no theme scenario`)
+    }
+    measured.push({ id, platform: run.platform, scenario, r, run, file })
   }
 }
 
 // StyleSheet reference per platform: the existing median, or the new one in a full round.
 const reference = {}
 for (const platform of PLATFORMS) {
-  const onPlatform = measured.filter((m) => m.platform === platform)
+  const onPlatform = measured.filter((m) => m.platform === platform && m.scenario === 'render')
   const ss = onPlatform.find((m) => m.id === 'stylesheet')
   if (ss) {
     const missing = results.configs.filter((c) => !onPlatform.some((m) => m.id === c.id))
@@ -106,16 +118,17 @@ for (const m of measured) {
   }
   m.ref = ref
   m.drift = m.r.controlMedian ? m.r.controlMedian / ref - 1 : null
-  if (m.drift === null) errors.push(`${m.id} ${m.platform}: no StyleSheet control readings`)
+  m.name = m.scenario === 'render' ? `${m.id} ${m.platform}` : `${m.id} ${m.platform} ${m.scenario}`
+  if (m.drift === null) errors.push(`${m.name}: no StyleSheet control readings`)
   else if (Math.abs(m.drift) > MAX_DRIFT && !opts['allow-drift']) {
     errors.push(
-      `${m.id} ${m.platform}: StyleSheet controls median ${m.r.controlMedian} ms is ${pct(m.drift)} from the StyleSheet median ${ref} ms (limit 5%). Re-measure on a quieter host, or pass --allow-drift to record it with a normalized value.`
+      `${m.name}: StyleSheet controls median ${m.r.controlMedian} ms is ${pct(m.drift)} from the StyleSheet median ${ref} ms (limit 5%). Re-measure on a quieter host, or pass --allow-drift to record it with a normalized value.`
     )
   }
   const known = results.devices?.[m.platform]?.model
   if (known && m.run.device?.model && known !== m.run.device.model) {
     warnings.push(
-      `${m.id} ${m.platform}: measured on ${m.run.device.model}, results.json devices say ${known}`
+      `${m.name}: measured on ${m.run.device.model}, results.json devices say ${known}`
     )
   }
 }
@@ -133,16 +146,19 @@ const entryFor = (m) => {
   const date = run.startedAt.slice(0, 10)
   const device = [run.device?.model, run.device?.os].filter(Boolean).join(', ')
   const s = run.settings
+  const theme = m.scenario === 'theme'
   const entry = {
     median: r.median,
-    ratioToStyleSheet: round2(r.median / m.ref),
+    ...(theme ? {} : { ratioToStyleSheet: round2(r.median / m.ref) }),
     spread: r.spread,
     warmLaunches: r.warmLaunches,
     controls: r.controls,
     measuredOn: date,
-    note: `Measured on ${date} on ${device} with scripts/bench/measure.py (${s.sweeps} sweeps x ${s.launches} warm launches). StyleSheet controls median ${r.controlMedian} ms, ${pct(m.drift)} vs the StyleSheet median ${m.ref} ms.`,
+    note: `Measured on ${date} on ${device} with scripts/bench/measure.py${theme ? ' --scenario theme' : ''} (${s.sweeps} sweeps x ${s.launches} warm launches${theme ? ', each the average of 10 theme changes' : ''}). StyleSheet controls median ${r.controlMedian} ms, ${pct(m.drift)} vs the StyleSheet median ${m.ref} ms.`,
   }
-  if (r.memory && !opts['skip-memory'].includes(m.platform)) {
+  if (theme) {
+    // no memory in the theme scenario
+  } else if (r.memory && !opts['skip-memory'].includes(m.platform)) {
     const { median, peak, spread, launches, controls, controlMedian, breakdown } = r.memory
     entry.memory = {
       median,
@@ -164,14 +180,30 @@ const entryFor = (m) => {
   if (Math.abs(m.drift) > MAX_DRIFT) {
     entry.normalized = {
       median: round2((r.median * m.ref) / r.controlMedian),
-      ratioToStyleSheet: round2(r.median / r.controlMedian),
+      ...(theme ? {} : { ratioToStyleSheet: round2(r.median / r.controlMedian) }),
       note: `Merged with --allow-drift: controls drifted ${pct(m.drift)}. normalized = median scaled by StyleSheet median / controls median.`,
     }
   }
   return entry
 }
 
-const byConfig = Map.groupBy(measured, (m) => m.id)
+// Theme entries sit next to the render ones and leave the config's version and label alone.
+for (const m of measured.filter((m) => m.scenario === 'theme')) {
+  const config = results.configs.find((c) => c.id === m.id)
+  if (!config) throw new Error(`${m.id}: measure the render scenario first, it is not in results.json`)
+  config.theme = { ...config.theme, [m.platform]: entryFor(m) }
+  const version = m.r.build?.version
+  if (version && config.version && version !== config.version) {
+    warnings.push(
+      `${m.name}: measured ${version}, the render numbers (and label) are ${config.version}`
+    )
+  }
+}
+
+const byConfig = Map.groupBy(
+  measured.filter((m) => m.scenario === 'render'),
+  (m) => m.id
+)
 for (const [id, ms] of byConfig) {
   const bench = benchConfigs.find((c) => c.id === id)
   let config = results.configs.find((c) => c.id === id)
@@ -215,30 +247,39 @@ for (const [id, ms] of byConfig) {
 }
 
 for (const m of measured) {
-  if (m.run.memoryMetrics && !opts['skip-memory'].includes(m.platform))
+  if (m.scenario === 'render' && m.run.memoryMetrics && !opts['skip-memory'].includes(m.platform))
     results.memoryMetrics = { ...results.memoryMetrics, [m.platform]: m.run.memoryMetrics }
 }
 
 for (const platform of PLATFORMS) {
-  const ss = measured.find((m) => m.platform === platform && m.id === 'stylesheet')
+  const ss = measured.find(
+    (m) => m.platform === platform && m.id === 'stylesheet' && m.scenario === 'render'
+  )
   if (ss?.run.baseline?.source?.startsWith('rebaseline')) {
     results.sessionBaseline[platform] = ss.run.baseline.value
   }
 }
 const allReplaced = results.configs.every((c) =>
-  PLATFORMS.every((p) => !c[p] || measured.some((m) => m.id === c.id && m.platform === p))
+  PLATFORMS.every(
+    (p) =>
+      !c[p] ||
+      measured.some((m) => m.id === c.id && m.platform === p && m.scenario === 'render')
+  )
 )
 if (allReplaced)
   results.date = measured
+    .filter((m) => m.scenario === 'render')
     .map((m) => m.run.startedAt.slice(0, 10))
     .sort()
     .at(-1)
 
 for (const w of warnings) console.warn(`warning: ${w}`)
 for (const m of measured) {
-  const e = results.configs.find((c) => c.id === m.id)[m.platform]
+  const config = results.configs.find((c) => c.id === m.id)
+  const e = m.scenario === 'theme' ? config.theme[m.platform] : config[m.platform]
+  const ratio = e.ratioToStyleSheet === undefined ? 'theme' : `x${e.ratioToStyleSheet.toFixed(2)}`
   console.log(
-    `${m.id.padEnd(12)} ${m.platform.padEnd(8)} ${String(e.median).padStart(8)} ms  x${e.ratioToStyleSheet.toFixed(2)}  controls ${pct(m.drift)}${e.normalized ? `  normalized ${e.normalized.median} ms` : ''}${e.memory ? `  memory ${e.memory.median} MB` : ''}`
+    `${m.id.padEnd(12)} ${m.platform.padEnd(8)} ${String(e.median).padStart(8)} ms  ${ratio}  controls ${pct(m.drift)}${e.normalized ? `  normalized ${e.normalized.median} ms` : ''}${e.memory ? `  memory ${e.memory.median} MB` : ''}`
   )
 }
 

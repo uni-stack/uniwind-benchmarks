@@ -115,4 +115,14 @@ export function formatMs(ms: number, decimals = 2): string {
 }
 
 // Export the hook
-export { useBenchmark, type UseBenchmarkReturn } from './useBenchmark'
+export { useBenchmark, type UseBenchmarkOptions, type UseBenchmarkReturn } from './useBenchmark'
+export {
+  applyColorScheme,
+  readScenario,
+  SCENARIO_LAUNCH_KEY,
+  SCENARIO_URL_SCHEME,
+  type AppearanceLike,
+  type Scenario,
+  type ScenarioSource,
+  type Theme,
+} from './scenario'

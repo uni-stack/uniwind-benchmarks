@@ -1,10 +1,21 @@
-import { useBenchmark } from '@uniwind-benchmarks/benchmark'
-import { ScrollView, Text, View } from 'react-native'
-import { StyleSheet } from 'react-native-unistyles'
+import { type Theme, useBenchmark } from '@uniwind-benchmarks/benchmark'
+import { Linking, ScrollView, Settings, Text, View } from 'react-native'
+import { StyleSheet, UnistylesRuntime } from 'react-native-unistyles'
+
+const scenarioSource = { Settings, Linking }
+
+// Adaptive themes follow the system, an explicit theme needs them off (only the first call pays for it)
+const setTheme = (theme: Theme) => {
+  if (UnistylesRuntime.hasAdaptiveThemes) {
+    UnistylesRuntime.setAdaptiveThemes(false)
+  }
+
+  UnistylesRuntime.setTheme(theme)
+}
 
 function App() {
-  const { isComplete, currentRun, totalRuns, average, min, max, itemsCount, renderKey } =
-    useBenchmark()
+  const { isComplete, currentRun, totalRuns, average, min, max, itemsCount, renderKey, runsLabel } =
+    useBenchmark({ scenarioSource, setTheme })
 
   return (
     <View style={styles.container}>
@@ -24,7 +35,7 @@ function App() {
           <Text style={styles.statsText}>Min: {min.toFixed(2)}ms</Text>
           <Text style={styles.statsText}>Max: {max.toFixed(2)}ms</Text>
           <Text style={styles.statsSubtext}>
-            {itemsCount * 2 + 3} views × {totalRuns} runs
+            {itemsCount * 2 + 3} views × {totalRuns} {runsLabel}
           </Text>
         </View>
       )}

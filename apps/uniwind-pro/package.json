@@ -15,7 +15,7 @@
     "react-native-reanimated": "4.6.0",
     "react-native-worklets": "0.12.1",
     "tailwindcss": "4.3.3",
-    "uniwind": "npm:uniwind-pro@1.7.0"
+    "uniwind": "npm:uniwind-pro@1.8.0"
   },
   "devDependencies": {
     "@babel/core": "7.29.7",

@@ -1,11 +1,17 @@
 import './global.css'
-import { useBenchmark } from '@uniwind-benchmarks/benchmark'
-import { ScrollView, Text, View } from 'react-native'
+import { type Theme, applyColorScheme, useBenchmark } from '@uniwind-benchmarks/benchmark'
+import { colorScheme } from 'nativewind'
+import { Appearance, Linking, ScrollView, Settings, Text, View } from 'react-native'
 import { ThemeProvider } from './ThemeProvider'
 
+const scenarioSource = { Settings, Linking }
+
+// NativeWind re-renders when React Native reports the new color scheme, so wait for that event
+const setTheme = (theme: Theme) => applyColorScheme(Appearance, theme, () => colorScheme.set(theme))
+
 function App() {
-  const { isComplete, currentRun, totalRuns, average, min, max, itemsCount, renderKey } =
-    useBenchmark()
+  const { isComplete, currentRun, totalRuns, average, min, max, itemsCount, renderKey, runsLabel } =
+    useBenchmark({ scenarioSource, setTheme })
 
   return (
     <ThemeProvider>
@@ -38,7 +44,7 @@ function App() {
               Max: {max.toFixed(2)}ms
             </Text>
             <Text className="text-[14px] text-typography text-center mt-2">
-              {itemsCount * 2 + 3} views × {totalRuns} runs
+              {itemsCount * 2 + 3} views × {totalRuns} {runsLabel}
             </Text>
           </View>
         )}
