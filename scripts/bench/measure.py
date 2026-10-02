@@ -1,7 +1,14 @@
 #!/usr/bin/env python3
 """Measure benchmark configs on a booted iOS simulator or Android emulator.
 
-Usage: scripts/bench/measure.py <ios|android> <device-id> <id...> [options]
+Usage: scripts/bench/measure.py <ios|android> <device-id> <id...> [--scenario render|theme] [options]
+
+Scenarios (one build serves both, see packages/benchmark/src/scenario.ts):
+  render  (default) every run re-mounts the list of 1000 items
+  theme   the list stays mounted, every run switches between the light and dark theme. The app is
+          launched with `-benchmarkScenario theme` (iOS, simctl launch) / data uwbench://theme (Android).
+          Only configs listing "theme" in configs.json; no memory readings. The StyleSheet controls
+          still run the render scenario: they check the host, not the library.
 
 Method (see README, Methodology):
   - host gate: every launch waits until the 1-minute load average is below --max-load (default 6)
@@ -23,9 +30,10 @@ Baseline: the StyleSheet median from results/results.json for the platform, so o
 re-measured without the others. --rebaseline measures StyleSheet warm launches first instead.
 
 Artifacts come from scripts/bench/build.sh (.bench/artifacts/{ios,android}/<id>.{app,apk}).
-Output: .bench/runs/<date>-<platform>.json with every launch, block and control reading, then a summary.
-iOS launches and reads go through the argent CLI (`argent run restart-app` / `argent run describe`),
-Android through adb (am start, one uiautomator dump).
+Output: .bench/runs/<date>-<platform>[-theme].json with every launch, block and control reading, then a summary.
+iOS launches and reads go through the argent CLI (`argent run restart-app` / `argent run describe`; theme
+launches use `xcrun simctl launch`, restart-app cannot pass launch arguments), Android through adb
+(am start, one uiautomator dump).
 """
 
 import argparse
@@ -47,6 +55,9 @@ ANDROID_HOME = os.environ.get("ANDROID_HOME", str(Path.home() / "Library/Android
 os.environ["PATH"] = f"{ANDROID_HOME}/platform-tools:{os.environ.get('PATH', '')}"
 
 QEMU_OK_PRIORITY = 31
+SCENARIO_LAUNCH_KEY = "benchmarkScenario"  # packages/benchmark/src/scenario.ts
+SCENARIO_URL_SCHEME = "uwbench://"
+RUNS_LABEL = {"render": "runs", "theme": "theme changes"}  # shown by the app as "2003 views × 10 <label>"
 MIB = 1024 * 1024
 MEMORY_METRICS = {
     "ios": {"total": "phys_footprint after a simulated memory warning (footprint)",
@@ -93,21 +104,25 @@ class Runner:
     def __init__(self, args, configs, results):
         self.a = args
         self.platform = args.platform
+        self.scenario = args.scenario
+        self.with_memory = args.scenario == "render"
         self.dev = args.device
         self.configs = {c["id"]: c for c in configs}
         self.activities = {}
         ss = next((c for c in results["configs"] if c["id"] == "stylesheet"), None)
         self.ss_median = ss[self.platform]["median"] if ss and self.platform in ss else None
         stamp = datetime.date.today().isoformat()
-        out = Path(args.out) if args.out else BENCH / "runs" / f"{stamp}-{self.platform}.json"
+        name = f"{stamp}-{self.platform}" + ("" if self.scenario == "render" else f"-{self.scenario}")
+        out = Path(args.out) if args.out else BENCH / "runs" / f"{name}.json"
         n = 2
         while not args.out and out.exists():
-            out = BENCH / "runs" / f"{stamp}-{self.platform}-{n}.json"
+            out = BENCH / "runs" / f"{name}-{n}.json"
             n += 1
         self.out = out
         self.run = {
             "tool": "scripts/bench/measure.py",
             "platform": self.platform,
+            "scenario": self.scenario,
             "device": {},
             "host": {
                 "chip": sh("sysctl -n machdep.cpu.brand_string").strip(),
@@ -121,7 +136,7 @@ class Runner:
                 "maxLoad": args.max_load, "tolerance": args.tolerance, "attempts": args.attempts,
                 "memorySettleS": args.memory_settle,
             },
-            "memoryMetrics": MEMORY_METRICS[self.platform],
+            "memoryMetrics": MEMORY_METRICS[self.platform] if self.with_memory else None,
             "configs": args.ids,
             "baseline": None,
             "styleSheetMedian": self.ss_median,
@@ -225,16 +240,30 @@ class Runner:
             raise RuntimeError(f"{cid}: installed copy does not match the artifact ({want} != {got})")
         return want
 
+    def scenario_of(self, cid):
+        """The StyleSheet controls always run the render scenario."""
+        return "render" if cid == "stylesheet" else self.scenario
+
     def launch(self, cid):
         pkg = self.app_id(cid)
+        scenario = self.scenario_of(cid)
         if self.platform == "ios":
-            sh(["argent", "run", "restart-app", "--udid", self.dev, "--bundleId", pkg])
+            if scenario == "render":
+                sh(["argent", "run", "restart-app", "--udid", self.dev, "--bundleId", pkg])
+                return
+            sh(["xcrun", "simctl", "terminate", self.dev, pkg], check=False)
+            time.sleep(1)
+            sh(["xcrun", "simctl", "launch", self.dev, pkg, f"-{SCENARIO_LAUNCH_KEY}", scenario])
             return
         if pkg not in self.activities:
             self.activities[pkg] = self.adb(f"shell cmd package resolve-activity --brief {pkg}").strip().splitlines()[-1]
         self.adb(f"shell am force-stop {pkg}")
         time.sleep(1)
-        self.adb(f"shell am start -n {self.activities[pkg]}")
+        if scenario == "render":
+            self.adb(f"shell am start -n {self.activities[pkg]}")
+        else:
+            # Explicit intent, so no intent filter is needed; Linking.getInitialURL only reports VIEW intents
+            self.adb(f"shell am start -n {self.activities[pkg]} -a android.intent.action.VIEW -d {SCENARIO_URL_SCHEME}{scenario}")
 
     def read_screen(self):
         if self.platform == "ios":
@@ -286,10 +315,14 @@ class Runner:
                 "breakdown": {k: round(kb(rf"^\s*{k}:\s+(\d+)") / 1024, 1) for k in ANDROID_SUMMARY}}
 
     @staticmethod
-    def parse(texts):
+    def parse(texts, scenario):
         joined = " | ".join(texts)
         if "Benchmark Complete" not in joined:
             return None, joined
+        label = re.search(r"views \S+ \d+ ([a-z ]+)", joined)
+        if not label or label.group(1).strip() != RUNS_LABEL[scenario]:
+            # e.g. the launch argument did not reach the app and it measured rendering instead
+            raise RuntimeError(f"expected the {scenario} scenario ({RUNS_LABEL[scenario]!r}), the app shows: {joined[:300]}")
         value = lambda k: float(re.search(k + r":\s*([\d.]+)\s*ms", joined).group(1))
         return {"average": value("Average"), "min": value("Min"), "max": value("Max"),
                 "title": texts[0] if texts else ""}, None
@@ -308,27 +341,29 @@ class Runner:
 
     def measure(self, cid, sweep, kind, block=None):
         load, ok, waited = self.gate()
-        rec = {"config": cid, "sweep": sweep, "kind": kind, "block": block, "load": load, "loadGateOk": ok,
-               "gateWaitS": waited, "timestamp": datetime.datetime.now().isoformat(timespec="seconds")}
+        scenario = self.scenario_of(cid)
+        rec = {"config": cid, "scenario": scenario, "sweep": sweep, "kind": kind, "block": block, "load": load,
+               "loadGateOk": ok, "gateWaitS": waited, "timestamp": datetime.datetime.now().isoformat(timespec="seconds")}
         pri_before = self.qemu_priority()
         self.launch(cid)
         time.sleep(self.a.wait)
-        res, raw = self.parse(self.read_screen())
+        res, raw = self.parse(self.read_screen(), scenario)
         extra = 0
         while res is None and extra < 4:
             time.sleep(10)
             extra += 1
-            res, raw = self.parse(self.read_screen())
+            res, raw = self.parse(self.read_screen(), scenario)
         rec["extraReads"] = extra
         if self.platform == "android":
             rec["qemuPriBefore"], rec["qemuPriAfter"] = pri_before, self.qemu_priority()
         if res:
             rec.update(res)
-            try:
-                rec["memory"] = self.read_memory(cid)
-            except Exception as e:  # noqa: BLE001 - a missing reading only rejects the block
-                rec["memory"] = None
-                rec["memoryError"] = str(e)[:300]
+            if self.with_memory:
+                try:
+                    rec["memory"] = self.read_memory(cid)
+                except Exception as e:  # noqa: BLE001 - a missing reading only rejects the block
+                    rec["memory"] = None
+                    rec["memoryError"] = str(e)[:300]
         else:
             rec.update({"average": None, "error": "no result", "raw": (raw or "")[:300]})
         self.run["launches"].append(rec)
@@ -341,7 +376,7 @@ class Runner:
     def block_ok(self, controls, warm):
         base = self.run["baseline"]["value"]
         reasons = []
-        if any(x.get("memory") is None for x in [*controls, *warm] if x.get("average") is not None):
+        if self.with_memory and any(x.get("memory") is None for x in [*controls, *warm] if x.get("average") is not None):
             reasons.append("launch without a memory reading")
         for c in controls:
             if c.get("average") is None or abs(c["average"] - base) / base > self.a.tolerance:
@@ -444,7 +479,8 @@ class Runner:
             ref = self.ss_median
             self.run["results"][cid] = {
                 "median": m,
-                "ratioToStyleSheet": round(m / ref, 2) if m and ref else None,
+                # StyleSheet has no themes, a theme change has nothing to compare with
+                "ratioToStyleSheet": round(m / ref, 2) if m and ref and self.scenario == "render" else None,
                 "spread": [min(warm), max(warm)] if warm else None,
                 "warmLaunches": warm,
                 "n": len(warm),
@@ -453,7 +489,7 @@ class Runner:
                 "controlDrift": round(cm / ref - 1, 4) if cm and ref else None,
                 "complete": len(sweeps_ok) == self.a.sweeps,
                 "build": self.run["builds"].get(cid),
-                "memory": self.aggregate_memory(cid, launches),
+                "memory": self.aggregate_memory(cid, launches) if self.with_memory else None,
             }
 
     def aggregate_memory(self, cid, launches):
@@ -482,7 +518,7 @@ class Runner:
     def summary(self):
         ref = self.ss_median
         print()
-        print(f"{self.platform}: {self.run['device'].get('model')}, baseline {self.run['baseline']['value']} "
+        print(f"{self.platform} {self.scenario}: {self.run['device'].get('model')}, baseline {self.run['baseline']['value']} "
               f"({self.run['baseline']['source']}), StyleSheet median in results.json {ref}")
         print(f"  {'config':12s} {'median':>8s} {'ratio':>6s} {'n':>3s}  {'spread':15s} {'controls':>9s} {'drift':>7s}  version")
         for cid, r in self.run["results"].items():
@@ -497,6 +533,9 @@ class Runner:
                   f"{r['controlMedian'] or '-':>9} {drift:>7}  {(r['build'] or {}).get('version')} {' '.join(flags)}")
         rejected = [b["block"] for b in self.run["blocks"] if not b["accepted"]]
         print(f"  rejected blocks: {', '.join(rejected) or 'none'}")
+        if not self.with_memory:
+            print(f"  raw data: {self.out}")
+            return
         m = MEMORY_METRICS[self.platform]
         print(f"\n  memory [{m['unit']}]: total = {m['total']}" + (f", peak = {m['peak']}" if m["peak"] else ""))
         print(f"  {'config':12s} {'total':>8s} {'peak':>8s} {'spread':15s} {'controls':>9s} {'vs ctrl':>8s}")
@@ -519,6 +558,8 @@ def main():
     p.add_argument("platform", choices=["ios", "android"])
     p.add_argument("device", help="simulator UDID (xcrun simctl list devices) or adb serial (adb devices)")
     p.add_argument("ids", nargs="+", metavar="id")
+    p.add_argument("--scenario", choices=["render", "theme"], default="render",
+                   help="render: re-mount the list (default), theme: switch the theme of the mounted list")
     p.add_argument("--sweeps", type=int, default=2, help="sweeps, alternating forward/reverse (default 2)")
     p.add_argument("--launches", type=int, default=3, help="warm launches per block (default 3)")
     p.add_argument("--rebaseline", action="store_true", help="measure the StyleSheet baseline instead of using results.json")
@@ -535,6 +576,9 @@ def main():
     if unknown:
         p.error(f"unknown id(s) {', '.join(unknown)}; expected: {' '.join(ids)}")
     a.ids = list(dict.fromkeys(a.ids))
+    unsupported = [c["id"] for c in configs if c["id"] in a.ids and a.scenario not in c.get("scenarios", ["render"])]
+    if unsupported:
+        p.error(f"{', '.join(unsupported)} cannot run the {a.scenario} scenario (scenarios in configs.json)")
     results = json.loads((ROOT / "results/results.json").read_text())
     runner = Runner(a, configs, results)
     try:

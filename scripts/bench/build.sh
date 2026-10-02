@@ -125,6 +125,8 @@ build_ios() {
 build_android() {
   local log="$BENCH/logs/$ID-android.log" apk=app/build/outputs/apk/release/app-release.apk
   cd "$APP/android"
+  # A stale CMake cache from another version (Pro switch) makes `clean` itself fail to configure
+  rm -rf app/.cxx
   if ! ./gradlew clean >"$BENCH/logs/$ID-android-clean.log" 2>&1; then
     echo "android $ID FAILED (gradlew clean), see $BENCH/logs/$ID-android-clean.log"
     return 1

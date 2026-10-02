@@ -1,5 +1,5 @@
 {
-  "comment": "Benchmark configs, in sweep order. ids match results/results.json. version is read from <app>/node_modules/<versionModule>. label is a template ({library}, {version}). pro.version: the Uniwind Pro version this id stands for (switched with scripts/use-pro.sh, never by the bench scripts). pro.hideExpoMetroConfig: this Pro version needs @expo/metro-config hidden (use-pro.sh does it). highlight: the config id drawn in bold in the charts, baseline: the 1.0x reference of the render time charts (both default to the latest uniwind version).",
+  "comment": "Benchmark configs, in sweep order. ids match results/results.json. version is read from <app>/node_modules/<versionModule>. label is a template ({library}, {version}). pro.version: the Uniwind Pro version this id stands for (switched with scripts/use-pro.sh, never by the bench scripts). pro.hideExpoMetroConfig: this Pro version needs @expo/metro-config hidden (use-pro.sh does it). scenarios: what the app can measure (render = re-mount the list, theme = switch the theme of the mounted list; StyleSheet has no themes). highlight: the config id drawn in bold in the charts, baseline: the 1.0x reference of the render time charts (both default to the latest uniwind version).",
   "highlight": "pro-1.8.0",
   "baseline": "uniwind",
   "configs": [
@@ -11,6 +11,7 @@
       "app": "apps/stylesheet",
       "versionModule": "react-native",
       "expo": false,
+      "scenarios": ["render"],
       "ios": {
         "workspace": "stylesheet",
         "scheme": "stylesheet",
@@ -26,6 +27,7 @@
       "app": "apps/unistyles3",
       "versionModule": "react-native-unistyles",
       "expo": false,
+      "scenarios": ["render", "theme"],
       "ios": {
         "workspace": "unistyles3",
         "scheme": "unistyles3",
@@ -41,6 +43,7 @@
       "app": "apps/uniwind",
       "versionModule": "uniwind",
       "expo": false,
+      "scenarios": ["render", "theme"],
       "ios": {
         "workspace": "uniwind",
         "scheme": "uniwind",
@@ -56,6 +59,7 @@
       "app": "apps/nativewind4",
       "versionModule": "nativewind",
       "expo": false,
+      "scenarios": ["render", "theme"],
       "ios": {
         "workspace": "nativewind4",
         "scheme": "nativewind4",
@@ -71,6 +75,7 @@
       "app": "apps/nativewind5",
       "versionModule": "nativewind",
       "expo": true,
+      "scenarios": ["render", "theme"],
       "ios": {
         "workspace": "nativewind5",
         "scheme": "nativewind5",
@@ -86,6 +91,7 @@
       "app": "apps/uniwind-pro",
       "versionModule": "uniwind",
       "expo": false,
+      "scenarios": ["render", "theme"],
       "pro": { "version": "1.0.1", "hideExpoMetroConfig": true },
       "ios": {
         "workspace": "uniwindpro",
@@ -102,6 +108,7 @@
       "app": "apps/uniwind-pro",
       "versionModule": "uniwind",
       "expo": false,
+      "scenarios": ["render", "theme"],
       "pro": { "version": "1.8.0", "hideExpoMetroConfig": false },
       "ios": {
         "workspace": "uniwindpro",

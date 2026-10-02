@@ -1,10 +1,14 @@
 import './global.css'
-import { useBenchmark } from '@uniwind-benchmarks/benchmark'
-import { ScrollView, Text, View } from 'react-native'
+import { type Theme, useBenchmark } from '@uniwind-benchmarks/benchmark'
+import { Linking, ScrollView, Settings, Text, View } from 'react-native'
+import { Uniwind } from 'uniwind'
+
+const scenarioSource = { Settings, Linking }
+const setTheme = (theme: Theme) => Uniwind.setTheme(theme)
 
 function App() {
-  const { isComplete, currentRun, totalRuns, average, min, max, itemsCount, renderKey } =
-    useBenchmark()
+  const { isComplete, currentRun, totalRuns, average, min, max, itemsCount, renderKey, runsLabel } =
+    useBenchmark({ scenarioSource, setTheme })
 
   return (
     <View className="flex-1 mt-25 px-3">
@@ -34,7 +38,7 @@ function App() {
             Max: {max.toFixed(2)}ms
           </Text>
           <Text className="text-[14px] text-typography text-center mt-2">
-            {itemsCount * 2 + 3} views × {totalRuns} runs
+            {itemsCount * 2 + 3} views × {totalRuns} {runsLabel}
           </Text>
         </View>
       )}

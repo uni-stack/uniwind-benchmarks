@@ -192,6 +192,48 @@ export const buildRelativeHtml = ({ title, subtitle, entries, axisLabel, unit = 
   return page({ title, subtitle, dot: LIBRARY_COLORS.Uniwind, body })
 }
 
+// Ranked list for the theme change, a different layout than the render chart so the two are not mixed up:
+// one row per library, fastest on top, a slim track with the time (linear, from 0) ending in a dot, then the
+// time and "Nx faster/slower" against the baseline entry.
+// entries: { label, library, value, bold?, baseline? }
+export const buildThemeHtml = ({ title, subtitle, entries, footnote, unit = 'ms' }) => {
+  const sorted = [...entries].sort((a, b) => a.value - b.value)
+  const base = sorted.find((e) => e.baseline)?.value
+  if (!base) throw new Error('buildThemeHtml: no baseline entry')
+  const max = Math.max(...sorted.map((e) => e.value))
+  const area = { y: 225, h: 720 }
+  const track = { x: 600, w: 760, h: 16 }
+  const rowH = area.h / sorted.length
+  const rows = sorted.map((e, i) => {
+    const cy = area.y + rowH * (i + 0.5)
+    const w = Math.max(track.h, (e.value / max) * track.w)
+    const fill = LIBRARY_COLORS[e.library] ?? COLORS.time[0]
+    const bold = e.bold ? ' bold' : ''
+    const ratio = e.value / base
+    const [text, color] = e.baseline
+      ? ['baseline', '#6b6b6b']
+      : ratio < 1
+        ? [`${(1 / ratio).toFixed(2)}x faster`, FASTER]
+        : [`${ratio.toFixed(2)}x slower`, SLOWER]
+    const band = e.bold
+      ? `<rect x="120" y="${cy - rowH / 2 + 10}" width="${W - 240}" height="${rowH - 20}" rx="18" fill="#F3F4F8"/>`
+      : ''
+    return `${band}
+  <text x="${track.x - 40}" y="${cy + 10}" text-anchor="end" class="label${bold}">${e.label}</text>
+  <rect x="${track.x}" y="${cy - track.h / 2}" width="${track.w}" height="${track.h}" rx="${track.h / 2}" fill="#ECEDF1"/>
+  <rect x="${track.x}" y="${cy - track.h / 2}" width="${w}" height="${track.h}" rx="${track.h / 2}" fill="${fill}"/>
+  <circle cx="${track.x + w}" cy="${cy}" r="14" fill="${fill}" stroke="#fff" stroke-width="3"/>
+  <text x="${track.x + track.w + 60}" y="${cy + 12}" class="themeValue">${e.value.toFixed(1)} ${unit}</text>
+  <text x="${track.x + track.w + 270}" y="${cy + 10}" class="ratio" style="fill:${color}">${text}</text>`
+  })
+  const body = [
+    '<style>.themeValue{font-size:34px;font-weight:700}</style>',
+    ...rows,
+    `<text x="150" y="${H - 50}" class="subtitle">Lower is better · each bar starts at 0 ${unit}</text>`,
+  ].join('\n')
+  return page({ title, subtitle, footnote, dot: LIBRARY_COLORS.Uniwind, body })
+}
+
 export const render = (html, outPath) => {
   const dir = mkdtempSync(join(tmpdir(), 'chart-'))
   const htmlPath = join(dir, 'chart.html')

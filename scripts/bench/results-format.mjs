@@ -58,6 +58,36 @@ export const renderTable = (results, platform) => {
   ].join('\n')
 }
 
+// Theme change (<config>.theme.<platform>), with the same "Nx faster/slower" against the baseline as the chart.
+export const renderThemeTable = (results, platform) => {
+  const measured = results.configs.filter((c) => c.theme?.[platform])
+  if (measured.length === 0) return '_Not measured yet._'
+  const base = measured.find((c) => c.id === baselineId(results))
+  const baseMedian = base?.theme[platform].median
+  const relative = (c) => {
+    if (!baseMedian) return '-'
+    if (c.id === base.id) return 'baseline'
+    const ratio = c.theme[platform].median / baseMedian
+    return ratio < 1 ? `${(1 / ratio).toFixed(2)}x faster` : `${ratio.toFixed(2)}x slower`
+  }
+  // The theme entry has its own build: a config whose render numbers are from an unreleased build may have
+  // been theme-measured from the published version
+  const label = (c) => {
+    const text = c.theme[platform].build?.published ? c.label : tableLabel(c, platform)
+    return c.id === highlightedId(results) ? `**${text}**` : text
+  }
+  const rows = measured
+    .sort((a, b) => a.theme[platform].median - b.theme[platform].median)
+    .map(
+      (c) => `| ${label(c)} | ${c.theme[platform].median.toFixed(2)} | ${relative(c)} |`
+    )
+  return [
+    `| Library | Theme change [ms] | vs ${base?.label ?? 'baseline'} |`,
+    '| --- | --- | --- |',
+    ...rows,
+  ].join('\n')
+}
+
 // Memory after the run (forced GC), in MB, with the difference to StyleSheet; iOS also has the peak.
 export const renderMemoryTable = (results, platform) => {
   const measured = results.configs.filter((c) => c[platform]?.memory)
@@ -93,13 +123,14 @@ const replaceBetween = (path, text, name, body) => {
   return `${text.slice(0, start + open.length)}\n${body}\n${text.slice(end)}`
 }
 
-// Rewrites the tables between <!-- results:<platform> --> / <!-- memory:<platform> --> and their closing markers,
-// when the README has them.
+// Rewrites the tables between <!-- results:<platform> --> / <!-- memory:<platform> --> / <!-- theme:<platform> -->
+// and their closing markers, when the README has them.
 export const updateReadme = (path, results, platforms = ['ios', 'android']) => {
   let text = readFileSync(path, 'utf8')
   for (const platform of platforms) {
     text = replaceBetween(path, text, `results:${platform}`, renderTable(results, platform))
     text = replaceBetween(path, text, `memory:${platform}`, renderMemoryTable(results, platform))
+    text = replaceBetween(path, text, `theme:${platform}`, renderThemeTable(results, platform))
   }
   writeFileSync(path, text)
 }
